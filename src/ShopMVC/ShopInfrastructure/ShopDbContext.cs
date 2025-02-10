@@ -50,13 +50,13 @@ public partial class ShopDbContext : DbContext
     {
         modelBuilder.Entity<Cart>(entity =>
         {
-            entity.HasKey(e => e.CtId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("carts");
 
             entity.HasIndex(e => e.CtUserId, "unique_user_cart").IsUnique();
 
-            entity.Property(e => e.CtId).HasColumnName("ct_id");
+            entity.Property(e => e.Id).HasColumnName("ct_id");
             entity.Property(e => e.CtPrice).HasColumnName("ct_price");
             entity.Property(e => e.CtQuantity).HasColumnName("ct_quantity");
             entity.Property(e => e.CtUserId).HasColumnName("ct_user_id");
@@ -68,11 +68,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.CgId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("categories");
 
-            entity.Property(e => e.CgId).HasColumnName("cg_id");
+            entity.Property(e => e.Id).HasColumnName("cg_id");
             entity.Property(e => e.CgChildCategory)
                 .HasMaxLength(100)
                 .HasColumnName("cg_child_category");
@@ -86,11 +86,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<Country>(entity =>
         {
-            entity.HasKey(e => e.CoId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("countries");
 
-            entity.Property(e => e.CoId).HasColumnName("co_id");
+            entity.Property(e => e.Id).HasColumnName("co_id");
             entity.Property(e => e.CoName)
                 .HasMaxLength(50)
                 .HasColumnName("co_name");
@@ -98,11 +98,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<Manufacturer>(entity =>
         {
-            entity.HasKey(e => e.MnId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("manufacturers");
 
-            entity.Property(e => e.MnId).HasColumnName("mn_id");
+            entity.Property(e => e.Id).HasColumnName("mn_id");
             entity.Property(e => e.MnContactInfo)
                 .HasMaxLength(1000)
                 .HasColumnName("mn_contact_info");
@@ -118,11 +118,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OdId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("orders");
 
-            entity.Property(e => e.OdId).HasColumnName("od_id");
+            entity.Property(e => e.Id).HasColumnName("od_id");
             entity.Property(e => e.OdDiscount).HasColumnName("od_discount");
             entity.Property(e => e.OdNotes)
                 .HasMaxLength(100)
@@ -157,11 +157,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.PdId).HasName("PK_product");
+            entity.HasKey(e => e.Id).HasName("PK_product");
 
             entity.ToTable("products");
 
-            entity.Property(e => e.PdId).HasColumnName("pd_id");
+            entity.Property(e => e.Id).HasColumnName("pd_id");
             entity.Property(e => e.PdAbout)
                 .HasMaxLength(1000)
                 .HasColumnName("pd_about");
@@ -182,11 +182,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<ProductCart>(entity =>
         {
-            entity.HasKey(e => e.PcId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("product_carts");
 
-            entity.Property(e => e.PcId).HasColumnName("pc_id");
+            entity.Property(e => e.Id).HasColumnName("pc_id");
             entity.Property(e => e.PcCart).HasColumnName("pc_cart");
             entity.Property(e => e.PcPrice)
                 .HasColumnType("decimal(18, 0)")
@@ -205,11 +205,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<ProductCatergory>(entity =>
         {
-            entity.HasKey(e => e.PctId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("product_catergories");
 
-            entity.Property(e => e.PctId).HasColumnName("pct_id");
+            entity.Property(e => e.Id).HasColumnName("pct_id");
             entity.Property(e => e.PctCategoryId).HasColumnName("pct_category_id");
             entity.Property(e => e.PctProductId).HasColumnName("pct_product_id");
 
@@ -224,11 +224,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<ProductOrder>(entity =>
         {
-            entity.HasKey(e => e.PoId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("product_orders");
 
-            entity.Property(e => e.PoId).HasColumnName("po_id");
+            entity.Property(e => e.Id).HasColumnName("po_id");
             entity.Property(e => e.PoOrderId).HasColumnName("po_order_id");
             entity.Property(e => e.PoPrice)
                 .HasColumnType("decimal(18, 0)")
@@ -247,11 +247,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<Receipt>(entity =>
         {
-            entity.HasKey(e => e.RpId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("receipts");
 
-            entity.Property(e => e.RpId).HasColumnName("rp_id");
+            entity.Property(e => e.Id).HasColumnName("rp_id");
             entity.Property(e => e.RpAbout)
                 .HasMaxLength(100)
                 .HasColumnName("rp_about");
@@ -277,11 +277,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<Shiping>(entity =>
         {
-            entity.HasKey(e => e.ShId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("shipings");
 
-            entity.Property(e => e.ShId).HasColumnName("sh_id");
+            entity.Property(e => e.Id).HasColumnName("sh_id");
             entity.Property(e => e.ShAdress)
                 .HasMaxLength(100)
                 .HasColumnName("sh_adress");
@@ -299,11 +299,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<ShippingCompany>(entity =>
         {
-            entity.HasKey(e => e.ScId);
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("shipping_companies");
 
-            entity.Property(e => e.ScId).HasColumnName("sc_id");
+            entity.Property(e => e.Id).HasColumnName("sc_id");
             entity.Property(e => e.ScAvgTimeNeed)
                 .HasMaxLength(100)
                 .HasColumnName("sc_avg_time_need");
@@ -315,11 +315,11 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UrId).HasName("PK_users");
+            entity.HasKey(e => e.Id).HasName("PK_users");
 
             entity.ToTable("// users");
 
-            entity.Property(e => e.UrId).HasColumnName("ur_id");
+            entity.Property(e => e.Id).HasColumnName("ur_id");
             entity.Property(e => e.UrBirthdate)
                 .HasColumnType("datetime")
                 .HasColumnName("ur_birthdate");
