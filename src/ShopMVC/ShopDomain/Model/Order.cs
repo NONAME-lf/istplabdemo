@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using ShopDomain.Model;
 
 namespace ShopInfrastructure;
 
-public partial class Order
+public partial class Order : Entity
 {
     public int OdId { get; set; }
 

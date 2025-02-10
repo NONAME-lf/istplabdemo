@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ShopDomain.Model;
+using ShopInfrastructure.Models;
 namespace ShopInfrastructure.Controllers;
 
 public class HomeController : Controller
