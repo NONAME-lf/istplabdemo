@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using ShopDomain.Model;
+﻿namespace ShopDomain.Model;
 
-namespace ShopInfrastructure;
-
-public partial class ProductCatergory
+public partial class ProductCatergory : Entity
 {
-    public int PctId { get; set; }
+    //public int PctId { get; set; }
 
     public int? PctProductId { get; set; }
 

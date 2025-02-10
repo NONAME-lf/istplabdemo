@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using ShopDomain.Model;
+﻿using ShopInfrastructure;
 
-namespace ShopInfrastructure;
+namespace ShopDomain.Model;
 
-public partial class User
+public partial class User : Entity
 {
-    public int UrId { get; set; }
+    //public int UrId { get; set; }
 
     public string? UrNickname { get; set; }
 

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ShopInfrastructure;
 
-namespace ShopInfrastructure;
+namespace ShopDomain.Model;
 
-public partial class Cart
+public partial class Cart : Entity
 {
-    public int CtId { get; set; }
+    //public int CtId { get; set; }
 
     public int? CtQuantity { get; set; }
 

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ShopInfrastructure;
 
-namespace ShopInfrastructure;
+namespace ShopDomain.Model;
 
-public partial class Category
+public partial class Category : Entity
 {
-    public int CgId { get; set; }
+    // public int CgId { get; set; }
 
     public string? CgName { get; set; }
 

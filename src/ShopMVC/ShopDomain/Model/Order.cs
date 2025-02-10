@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using ShopDomain.Model;
-
-namespace ShopInfrastructure;
+﻿namespace ShopDomain.Model;
 
 public partial class Order : Entity
 {
-    public int OdId { get; set; }
+    //public int OdId { get; set; }
 
     public int? OdUser { get; set; }
 

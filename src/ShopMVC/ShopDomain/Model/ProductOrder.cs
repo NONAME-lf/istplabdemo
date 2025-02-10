@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using ShopDomain.Model;
+﻿using ShopInfrastructure;
 
-namespace ShopInfrastructure;
+namespace ShopDomain.Model;
 
-public partial class ProductOrder
+public partial class ProductOrder : Entity
 {
-    public int PoId { get; set; }
+    //public int PoId { get; set; }
 
     public int? PoProductId { get; set; }
 

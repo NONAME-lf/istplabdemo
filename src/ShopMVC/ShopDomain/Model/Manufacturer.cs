@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ShopInfrastructure;
 
-namespace ShopInfrastructure;
+namespace ShopDomain.Model;
 
-public partial class Manufacturer
+public partial class Manufacturer : Entity
 {
-    public int MnId { get; set; }
+    //public int MnId { get; set; }
 
     public string? MnName { get; set; }
 

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using ShopDomain.Model;
+﻿using ShopInfrastructure;
 
-namespace ShopInfrastructure;
+namespace ShopDomain.Model;
 
-public partial class Product
+public partial class Product : Entity
 {
-    public int PdId { get; set; }
+    //public int PdId { get; set; }
 
     public decimal? PdPrice { get; set; }
 
