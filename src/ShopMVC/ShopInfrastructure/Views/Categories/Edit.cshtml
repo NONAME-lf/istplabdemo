@@ -1,0 +1,9 @@
+@model ShopDomain.Model.Category
+
+<h2>Редагувати категорію</h2>
+<form asp-action="Edit">
+    <input type="hidden" asp-for="Id" />
+    <label>Назва:</label>
+    <input asp-for="CgName" />
+    <button type="submit">Зберегти</button>
+</form>

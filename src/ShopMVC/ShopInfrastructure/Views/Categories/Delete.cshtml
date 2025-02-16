@@ -1,0 +1,8 @@
+@model ShopDomain.Model.Category
+
+<h2>Видалити категорію</h2>
+<p>Ви впевнені, що хочете видалити категорію "@Model.CgName"?</p>
+<form asp-action="DeleteConfirmed">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit">Так, видалити</button>
+</form>
