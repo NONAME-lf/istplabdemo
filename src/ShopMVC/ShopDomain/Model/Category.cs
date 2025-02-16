@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using ShopDomain.Model;
-
-namespace ShopInfrastructure;
+﻿namespace ShopDomain.Model;
 
 public partial class Category : Entity
 {
-    //public int CgId { get; set; }
+    public new int Id { get; set; }
 
     public string? CgName { get; set; }
 
@@ -15,4 +11,5 @@ public partial class Category : Entity
     public string? CgDescription { get; set; }
 
     public virtual ICollection<ProductCatergory> ProductCatergories { get; set; } = new List<ProductCatergory>();
+    
 }

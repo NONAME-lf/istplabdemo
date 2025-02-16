@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ShopDomain.Model;
-
-namespace ShopInfrastructure;
+﻿namespace ShopDomain.Model;
 
 public partial class ProductCart : Entity
 {
