@@ -1,10 +1,12 @@
-﻿using ShopInfrastructure;
+﻿using System;
+using System.Collections.Generic;
+using ShopDomain.Model;
 
-namespace ShopDomain.Model;
+namespace ShopInfrastructure;
 
 public partial class Receipt : Entity
 {
-    // public int RpId { get; set; }
+    //public int RpId { get; set; }
 
     public DateTime? RpDateCreated { get; set; }
 

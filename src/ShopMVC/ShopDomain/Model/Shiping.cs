@@ -1,10 +1,12 @@
-﻿using ShopInfrastructure;
+﻿using System;
+using System.Collections.Generic;
+using ShopDomain.Model;
 
-namespace ShopDomain.Model;
+namespace ShopInfrastructure;
 
 public partial class Shiping : Entity
 {
-    // public int ShId { get; set; }
+    //public int ShId { get; set; }
 
     public string? ShAdress { get; set; }
 

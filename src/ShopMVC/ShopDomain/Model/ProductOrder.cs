@@ -1,6 +1,8 @@
-﻿using ShopInfrastructure;
+﻿using System;
+using System.Collections.Generic;
+using ShopDomain.Model;
 
-namespace ShopDomain.Model;
+namespace ShopInfrastructure;
 
 public partial class ProductOrder : Entity
 {

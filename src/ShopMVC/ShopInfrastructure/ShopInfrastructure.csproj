@@ -24,4 +24,8 @@
       <ProjectReference Include="..\ShopDomain\ShopDomain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Views\Categories\" />
+    </ItemGroup>
+
 </Project>

@@ -6,7 +6,7 @@ namespace ShopInfrastructure;
 
 public partial class Country : Entity
 {
-    // public int CoId { get; set; }
+    //public int CoId { get; set; }
 
     public string? CoName { get; set; }
 
