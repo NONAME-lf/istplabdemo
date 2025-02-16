@@ -1,0 +1,9 @@
+@model IEnumerable<ShopDomain.Model.Category>
+
+<h2>Категорії книжок</h2>
+<ul>
+    @foreach (var category in Model)
+    {
+        <li>@category.CgName</li>
+    }
+</ul>
