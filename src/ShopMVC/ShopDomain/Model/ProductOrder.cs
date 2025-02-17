@@ -1,4 +1,7 @@
-﻿namespace ShopDomain.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace ShopDomain.Model;
 
 public partial class ProductOrder : Entity
 {

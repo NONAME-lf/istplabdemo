@@ -1,8 +1,13 @@
-﻿namespace ShopDomain.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace ShopDomain.Model;
 
 public partial class Product : Entity
 {
     //public int PdId { get; set; }
+
+    public string? PdName { get; set; }
 
     public decimal? PdPrice { get; set; }
 

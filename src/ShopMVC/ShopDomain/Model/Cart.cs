@@ -1,8 +1,11 @@
-﻿namespace ShopDomain.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace ShopDomain.Model;
 
 public partial class Cart : Entity
 {
-    //public new int Id { get; set; }
+    //public int CtId { get; set; }
 
     public int? CtQuantity { get; set; }
 

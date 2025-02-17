@@ -1,8 +1,11 @@
-﻿namespace ShopDomain.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace ShopDomain.Model;
 
 public partial class ShippingCompany : Entity
 {
-    //public int ScId { get; set; }
+    // public int ScId { get; set; }
 
     public int? ScName { get; set; }
 

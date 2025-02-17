@@ -1,8 +1,11 @@
-﻿namespace ShopDomain.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace ShopDomain.Model;
 
 public partial class ProductCart : Entity
 {
-   //public int PcId { get; set; }
+    //public int PcId { get; set; }
 
     public int? PcProduct { get; set; }
 

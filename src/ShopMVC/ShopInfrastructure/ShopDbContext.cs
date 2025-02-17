@@ -170,6 +170,9 @@ public partial class ShopDbContext : DbContext
             entity.Property(e => e.PdMeasurements)
                 .HasMaxLength(10)
                 .HasColumnName("pd_measurements");
+            entity.Property(e => e.PdName)
+                .HasMaxLength(100)
+                .HasColumnName("pd_name");
             entity.Property(e => e.PdPrice)
                 .HasColumnType("money")
                 .HasColumnName("pd_price");
@@ -179,6 +182,7 @@ public partial class ShopDbContext : DbContext
                 .HasForeignKey(d => d.PdManufacturerId)
                 .HasConstraintName("FK_products_manufacturers");
         });
+
 
         modelBuilder.Entity<ProductCart>(entity =>
         {

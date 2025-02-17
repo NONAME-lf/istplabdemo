@@ -7,25 +7,34 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ShopDomain.Model;
 using ShopInfrastructure;
+using ShopInfrastructure.Models;
+using ShopInfrastructure.Controllers;
 
 namespace ShopInfrastructure.Controllers
 {
-    public class CategoriesController : Controller
+    public class ProductsController : Controller
     {
         private readonly ShopDbContext _context;
 
-        public CategoriesController(ShopDbContext context)
+        public ProductsController(ShopDbContext context)
         {
             _context = context;
         }
 
-        // GET: Categories
-        public async Task<IActionResult> Index()
+        // GET: Products
+        public async Task<IActionResult> Index(int? id, string? name)
         {
-            return View(await _context.Categories.ToListAsync());
+            // if (id == null) return RedirectToAction("Categories", "Index");
+            // ViewBag.CategoryId = id;
+            // ViewBag.CategoryName = name;
+            // var productByCategory = _context.Products.Where(b => b.CategoryId == id).Include(b => b.Category);
+            //
+            // return View(await productByCategory.ToListAsync());
+            var shopDbContext = _context.Products.Include(p => p.PdManufacturer);
+            return View(await shopDbContext.ToListAsync());
         }
 
-        // GET: Categories/Details/5
+        // GET: Products/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,39 +42,42 @@ namespace ShopInfrastructure.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
+            var product = await _context.Products
+                .Include(p => p.PdManufacturer)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (category == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return RedirectToAction("Index", "Products", new { id = category.Id, name = category.CgName });
+            return View(product);
         }
 
-        // GET: Categories/Create
+        // GET: Products/Create
         public IActionResult Create()
         {
+            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id");
             return View();
         }
 
-        // POST: Categories/Create
+        // POST: Products/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CgName,CgChildCategory,CgDescription")] Category category)
+        public async Task<IActionResult> Create([Bind("PdPrice,PdMeasurements,PdQuantity,PdDiscount,PdAbout,PdManufacturerId,Id")] Product product)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
+                _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(category);
+            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.PdManufacturerId);
+            return View(product);
         }
 
-        // GET: Categories/Edit/5
+        // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -73,22 +85,23 @@ namespace ShopInfrastructure.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
             {
                 return NotFound();
             }
-            return View(category);
+            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.PdManufacturerId);
+            return View(product);
         }
 
-        // POST: Categories/Edit/5
+        // POST: Products/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CgName,CgChildCategory,CgDescription")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("PdPrice,PdMeasurements,PdQuantity,PdDiscount,PdAbout,PdManufacturerId,Id")] Product product)
         {
-            if (id != category.Id)
+            if (id != product.Id)
             {
                 return NotFound();
             }
@@ -97,12 +110,12 @@ namespace ShopInfrastructure.Controllers
             {
                 try
                 {
-                    _context.Update(category);
+                    _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(category.Id))
+                    if (!ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -113,10 +126,11 @@ namespace ShopInfrastructure.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(category);
+            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.PdManufacturerId);
+            return View(product);
         }
 
-        // GET: Categories/Delete/5
+        // GET: Products/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -124,34 +138,35 @@ namespace ShopInfrastructure.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
+            var product = await _context.Products
+                .Include(p => p.PdManufacturer)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (category == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(category);
+            return View(product);
         }
 
-        // POST: Categories/Delete/5
+        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category != null)
+            var product = await _context.Products.FindAsync(id);
+            if (product != null)
             {
-                _context.Categories.Remove(category);
+                _context.Products.Remove(product);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CategoryExists(int id)
+        private bool ProductExists(int id)
         {
-            return _context.Categories.Any(e => e.Id == id);
+            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
