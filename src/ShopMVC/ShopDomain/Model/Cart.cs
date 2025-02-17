@@ -2,7 +2,7 @@
 
 public partial class Cart : Entity
 {
-    public new int Id { get; set; }
+    //public new int Id { get; set; }
 
     public int? CtQuantity { get; set; }
 

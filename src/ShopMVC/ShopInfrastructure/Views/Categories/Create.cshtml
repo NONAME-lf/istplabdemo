@@ -1,4 +1,4 @@
-@model ShopDomain.Model.ProductCatergory
+@model ShopDomain.Model.Category
 
 @{
     ViewData["Title"] = "Create";
@@ -6,19 +6,26 @@
 
 <h1>Create</h1>
 
-<h4>ProductCatergory</h4>
+<h4>Category</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="PctProductId" class="control-label"></label>
-                <select asp-for="PctProductId" class ="form-control" asp-items="ViewBag.PctProductId"></select>
+                <label asp-for="CgName" class="control-label"></label>
+                <input asp-for="CgName" class="form-control" />
+                <span asp-validation-for="CgName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PctCategoryId" class="control-label"></label>
-                <select asp-for="PctCategoryId" class ="form-control" asp-items="ViewBag.PctCategoryId"></select>
+                <label asp-for="CgChildCategory" class="control-label"></label>
+                <input asp-for="CgChildCategory" class="form-control" />
+                <span asp-validation-for="CgChildCategory" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CgDescription" class="control-label"></label>
+                <input asp-for="CgDescription" class="form-control" />
+                <span asp-validation-for="CgDescription" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -31,3 +38,6 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -22,8 +22,7 @@ namespace ShopInfrastructure.Controllers
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            var shopDbContext = _context.ProductCatergories.Include(p => p.PctCategory).Include(p => p.PctProduct);
-            return View(await shopDbContext.ToListAsync());
+            return View(await _context.Categories.ToListAsync());
         }
 
         // GET: Categories/Details/5
@@ -34,23 +33,19 @@ namespace ShopInfrastructure.Controllers
                 return NotFound();
             }
 
-            var productCatergory = await _context.ProductCatergories
-                .Include(p => p.PctCategory)
-                .Include(p => p.PctProduct)
+            var category = await _context.Categories
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (productCatergory == null)
+            if (category == null)
             {
                 return NotFound();
             }
 
-            return View(productCatergory);
+            return View(category);
         }
 
         // GET: Categories/Create
         public IActionResult Create()
         {
-            ViewData["PctCategoryId"] = new SelectList(_context.Categories, "Id", "Id");
-            ViewData["PctProductId"] = new SelectList(_context.Products, "Id", "Id");
             return View();
         }
 
@@ -59,17 +54,15 @@ namespace ShopInfrastructure.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PctProductId,PctCategoryId,Id")] ProductCatergory productCatergory)
+        public async Task<IActionResult> Create([Bind("Id,CgName,CgChildCategory,CgDescription")] Category category)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(productCatergory);
+                _context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PctCategoryId"] = new SelectList(_context.Categories, "Id", "Id", productCatergory.PctCategoryId);
-            ViewData["PctProductId"] = new SelectList(_context.Products, "Id", "Id", productCatergory.PctProductId);
-            return View(productCatergory);
+            return View(category);
         }
 
         // GET: Categories/Edit/5
@@ -80,14 +73,12 @@ namespace ShopInfrastructure.Controllers
                 return NotFound();
             }
 
-            var productCatergory = await _context.ProductCatergories.FindAsync(id);
-            if (productCatergory == null)
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
             {
                 return NotFound();
             }
-            ViewData["PctCategoryId"] = new SelectList(_context.Categories, "Id", "Id", productCatergory.PctCategoryId);
-            ViewData["PctProductId"] = new SelectList(_context.Products, "Id", "Id", productCatergory.PctProductId);
-            return View(productCatergory);
+            return View(category);
         }
 
         // POST: Categories/Edit/5
@@ -95,9 +86,9 @@ namespace ShopInfrastructure.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PctProductId,PctCategoryId,Id")] ProductCatergory productCatergory)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CgName,CgChildCategory,CgDescription")] Category category)
         {
-            if (id != productCatergory.Id)
+            if (id != category.Id)
             {
                 return NotFound();
             }
@@ -106,12 +97,12 @@ namespace ShopInfrastructure.Controllers
             {
                 try
                 {
-                    _context.Update(productCatergory);
+                    _context.Update(category);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductCatergoryExists(productCatergory.Id))
+                    if (!CategoryExists(category.Id))
                     {
                         return NotFound();
                     }
@@ -122,9 +113,7 @@ namespace ShopInfrastructure.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PctCategoryId"] = new SelectList(_context.Categories, "Id", "Id", productCatergory.PctCategoryId);
-            ViewData["PctProductId"] = new SelectList(_context.Products, "Id", "Id", productCatergory.PctProductId);
-            return View(productCatergory);
+            return View(category);
         }
 
         // GET: Categories/Delete/5
@@ -135,16 +124,14 @@ namespace ShopInfrastructure.Controllers
                 return NotFound();
             }
 
-            var productCatergory = await _context.ProductCatergories
-                .Include(p => p.PctCategory)
-                .Include(p => p.PctProduct)
+            var category = await _context.Categories
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (productCatergory == null)
+            if (category == null)
             {
                 return NotFound();
             }
 
-            return View(productCatergory);
+            return View(category);
         }
 
         // POST: Categories/Delete/5
@@ -152,19 +139,19 @@ namespace ShopInfrastructure.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var productCatergory = await _context.ProductCatergories.FindAsync(id);
-            if (productCatergory != null)
+            var category = await _context.Categories.FindAsync(id);
+            if (category != null)
             {
-                _context.ProductCatergories.Remove(productCatergory);
+                _context.Categories.Remove(category);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductCatergoryExists(int id)
+        private bool CategoryExists(int id)
         {
-            return _context.ProductCatergories.Any(e => e.Id == id);
+            return _context.Categories.Any(e => e.Id == id);
         }
     }
 }
