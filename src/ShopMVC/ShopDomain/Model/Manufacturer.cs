@@ -11,9 +11,9 @@ public partial class Manufacturer : Entity
 
     public string? MnContactInfo { get; set; }
 
-    public int? MnCountry { get; set; }
+    public int? CountryId { get; set; }
 
-    public virtual Country? MnCountryNavigation { get; set; }
+    public virtual Country? Country { get; set; }
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

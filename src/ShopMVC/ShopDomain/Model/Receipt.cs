@@ -19,9 +19,9 @@ public partial class Receipt : Entity
 
     public string? RpAbout { get; set; }
 
-    public int? RpShippingId { get; set; }
+    public int? ShippingId { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
-    public virtual Shiping? RpShipping { get; set; }
+    public virtual Shiping? Shipping { get; set; }
 }

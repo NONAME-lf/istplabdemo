@@ -5,7 +5,7 @@ namespace ShopDomain.Model;
 
 public partial class ShippingCompany : Entity
 {
-    // public int ScId { get; set; }
+    //public int ScId { get; set; }
 
     public int? ScName { get; set; }
 

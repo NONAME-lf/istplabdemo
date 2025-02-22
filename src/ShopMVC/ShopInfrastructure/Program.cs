@@ -1,5 +1,6 @@
 using ShopInfrastructure;
 using Microsoft.EntityFrameworkCore;
+using ShopDomain;
 
 var builder = WebApplication.CreateBuilder(args);
 

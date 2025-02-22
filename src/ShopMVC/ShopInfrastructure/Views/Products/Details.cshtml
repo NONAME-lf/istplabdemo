@@ -10,41 +10,44 @@
     <h4>Product</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class = "col-sm-10">
+            @Html.DisplayNameFor(model => model.PdName)
+        </dt>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PdPrice)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PdPrice)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PdMeasurements)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PdMeasurements)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PdQuantity)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PdQuantity)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PdDiscount)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PdDiscount)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PdAbout)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PdAbout)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PdManufacturer)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Manufacturer)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PdManufacturer.Id)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Manufacturer.Id)
         </dd>
     </dl>
 </div>

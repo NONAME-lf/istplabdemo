@@ -11,55 +11,61 @@
 </p>
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.PdPrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PdMeasurements)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PdQuantity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PdDiscount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PdAbout)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PdManufacturer)
-            </th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.PdName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PdPrice)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PdMeasurements)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PdQuantity)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PdDiscount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PdAbout)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Manufacturer)
+        </th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.PdPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PdMeasurements)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PdQuantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PdDiscount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PdAbout)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PdManufacturer.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.PdName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PdPrice)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PdMeasurements)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PdQuantity)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PdDiscount)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PdAbout)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Manufacturer.Id)
+        </td>
+        <td>
+            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+        </td>
+    </tr>
 }
     </tbody>
 </table>

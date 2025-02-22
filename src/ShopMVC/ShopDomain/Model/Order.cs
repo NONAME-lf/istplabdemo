@@ -17,19 +17,19 @@ public partial class Order : Entity
 
     public string? OdNotes { get; set; }
 
-    public int? OdReceiptId { get; set; }
+    public int? ReceiptId { get; set; }
 
-    public int? OdProtuctId { get; set; }
+    public int? ProtuctId { get; set; }
 
-    public int? OdShippingId { get; set; }
-
-    public virtual Product? OdProtuct { get; set; }
-
-    public virtual Receipt? OdReceipt { get; set; }
-
-    public virtual Shiping? OdShipping { get; set; }
+    public int? ShippingId { get; set; }
 
     public virtual User? OdUserNavigation { get; set; }
 
     public virtual ICollection<ProductOrder> ProductOrders { get; set; } = new List<ProductOrder>();
+
+    public virtual Product? Protuct { get; set; }
+
+    public virtual Receipt? Receipt { get; set; }
+
+    public virtual Shiping? Shipping { get; set; }
 }

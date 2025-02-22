@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using ShopDomain;
 using ShopDomain.Model;
-using ShopInfrastructure;
-using ShopInfrastructure.Models;
-using ShopInfrastructure.Controllers;
 
 namespace ShopInfrastructure.Controllers
 {
@@ -24,19 +18,19 @@ namespace ShopInfrastructure.Controllers
         // GET: Products
         public async Task<IActionResult> Index(int? id, string? name)
         {
-            if (id == null) return RedirectToAction("Categories", "Index");
+            if (id == null) return RedirectToAction("CategoriesController", "Index");
             ViewBag.CategoryId = id;
             ViewBag.CategoryName = name;
             var productByCategory = _context.Products
-                .Include(p => p.ProductCatergories)
-                    .ThenInclude(pc => pc.PctCategory)
-                .Where(b => b.ProductCatergories.Any(pc => pc.CategoryId == id));
+                .Include(p => p.ProductCategories)
+                    .ThenInclude(pc => pc.Category)
+                .Where(b => b.ProductCategories.Any(pc => pc.CategoryId == id));
             
             return View(await productByCategory.ToListAsync());
             
             
-            var shopDbContext = _context.Products.Include(p => p.PdManufacturer);
-            return View(await shopDbContext.ToListAsync());
+            // var shopDbContext = _context.Products.Include(p => p.Manufacturer);
+            // return View(await shopDbContext.ToListAsync());
         }
 
         // GET: Products/Details/5
@@ -48,7 +42,7 @@ namespace ShopInfrastructure.Controllers
             }
 
             var product = await _context.Products
-                .Include(p => p.PdManufacturer)
+                .Include(p => p.Manufacturer)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {
@@ -70,7 +64,7 @@ namespace ShopInfrastructure.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PdPrice,PdMeasurements,PdQuantity,PdDiscount,PdAbout,PdManufacturerId,Id")] Product product)
+        public async Task<IActionResult> Create([Bind("PdName, PdPrice,PdMeasurements,PdQuantity,PdDiscount,PdAbout,PdManufacturerId")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -78,7 +72,7 @@ namespace ShopInfrastructure.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.PdManufacturerId);
+            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.ManufacturerId);
             return View(product);
         }
 
@@ -95,7 +89,7 @@ namespace ShopInfrastructure.Controllers
             {
                 return NotFound();
             }
-            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.PdManufacturerId);
+            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.ManufacturerId);
             return View(product);
         }
 
@@ -104,7 +98,7 @@ namespace ShopInfrastructure.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PdPrice,PdMeasurements,PdQuantity,PdDiscount,PdAbout,PdManufacturerId,Id")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("PdName, PdPrice,PdMeasurements,PdQuantity,PdDiscount,PdAbout,PdManufacturerId,Id")] Product product)
         {
             if (id != product.Id)
             {
@@ -131,7 +125,7 @@ namespace ShopInfrastructure.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.PdManufacturerId);
+            ViewData["PdManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.ManufacturerId);
             return View(product);
         }
 
@@ -144,7 +138,7 @@ namespace ShopInfrastructure.Controllers
             }
 
             var product = await _context.Products
-                .Include(p => p.PdManufacturer)
+                .Include(p => p.Manufacturer)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {

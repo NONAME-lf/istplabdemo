@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using ShopDomain.Model;
 
-namespace ShopInfrastructure;
+namespace ShopDomain;
 
 public partial class ShopDbContext : DbContext
 {
@@ -30,7 +30,7 @@ public partial class ShopDbContext : DbContext
 
     public virtual DbSet<ProductCart> ProductCarts { get; set; }
 
-    public virtual DbSet<ProductCatergory> ProductCatergories { get; set; }
+    public virtual DbSet<ProductCategory> ProductCategories { get; set; }
 
     public virtual DbSet<ProductOrder> ProductOrders { get; set; }
 
@@ -54,15 +54,15 @@ public partial class ShopDbContext : DbContext
 
             entity.ToTable("carts");
 
-            entity.HasIndex(e => e.CtUserId, "unique_user_cart").IsUnique();
+            entity.HasIndex(e => e.UserId, "unique_user_cart").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ct_id");
             entity.Property(e => e.CtPrice).HasColumnName("ct_price");
             entity.Property(e => e.CtQuantity).HasColumnName("ct_quantity");
-            entity.Property(e => e.CtUserId).HasColumnName("ct_user_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.CtUser).WithOne(p => p.Cart)
-                .HasForeignKey<Cart>(d => d.CtUserId)
+            entity.HasOne(d => d.User).WithOne(p => p.Cart)
+                .HasForeignKey<Cart>(d => d.UserId)
                 .HasConstraintName("FK_carts_users");
         });
 
@@ -103,16 +103,16 @@ public partial class ShopDbContext : DbContext
             entity.ToTable("manufacturers");
 
             entity.Property(e => e.Id).HasColumnName("mn_id");
+            entity.Property(e => e.CountryId).HasColumnName("country_id");
             entity.Property(e => e.MnContactInfo)
                 .HasMaxLength(1000)
                 .HasColumnName("mn_contact_info");
-            entity.Property(e => e.MnCountry).HasColumnName("mn_country");
             entity.Property(e => e.MnName)
                 .HasMaxLength(50)
                 .HasColumnName("mn_name");
 
-            entity.HasOne(d => d.MnCountryNavigation).WithMany(p => p.Manufacturers)
-                .HasForeignKey(d => d.MnCountry)
+            entity.HasOne(d => d.Country).WithMany(p => p.Manufacturers)
+                .HasForeignKey(d => d.CountryId)
                 .HasConstraintName("FK_manufacturers_countries");
         });
 
@@ -130,29 +130,29 @@ public partial class ShopDbContext : DbContext
             entity.Property(e => e.OdPayment)
                 .HasMaxLength(50)
                 .HasColumnName("od_payment");
-            entity.Property(e => e.OdProtuctId).HasColumnName("od_protuct_id");
-            entity.Property(e => e.OdReceiptId).HasColumnName("od_receipt_id");
-            entity.Property(e => e.OdShippingId).HasColumnName("od_shipping_id");
             entity.Property(e => e.OdTotal)
                 .HasColumnType("decimal(18, 0)")
                 .HasColumnName("od_total");
             entity.Property(e => e.OdUser).HasColumnName("od_user");
-
-            entity.HasOne(d => d.OdProtuct).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.OdProtuctId)
-                .HasConstraintName("FK_orders_products");
-
-            entity.HasOne(d => d.OdReceipt).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.OdReceiptId)
-                .HasConstraintName("FK_orders_receipts");
-
-            entity.HasOne(d => d.OdShipping).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.OdShippingId)
-                .HasConstraintName("FK_orders_shipings");
+            entity.Property(e => e.ProtuctId).HasColumnName("protuct_id");
+            entity.Property(e => e.ReceiptId).HasColumnName("receipt_id");
+            entity.Property(e => e.ShippingId).HasColumnName("shipping_id");
 
             entity.HasOne(d => d.OdUserNavigation).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.OdUser)
                 .HasConstraintName("FK_orders_users");
+
+            entity.HasOne(d => d.Protuct).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ProtuctId)
+                .HasConstraintName("FK_orders_products");
+
+            entity.HasOne(d => d.Receipt).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ReceiptId)
+                .HasConstraintName("FK_orders_receipts");
+
+            entity.HasOne(d => d.Shipping).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ShippingId)
+                .HasConstraintName("FK_orders_shipings");
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -162,11 +162,11 @@ public partial class ShopDbContext : DbContext
             entity.ToTable("products");
 
             entity.Property(e => e.Id).HasColumnName("pd_id");
+            entity.Property(e => e.ManufacturerId).HasColumnName("manufacturer_id");
             entity.Property(e => e.PdAbout)
                 .HasMaxLength(1000)
                 .HasColumnName("pd_about");
             entity.Property(e => e.PdDiscount).HasColumnName("pd_discount");
-            entity.Property(e => e.PdManufacturerId).HasColumnName("pd_manufacturer_id");
             entity.Property(e => e.PdMeasurements)
                 .HasMaxLength(10)
                 .HasColumnName("pd_measurements");
@@ -178,11 +178,10 @@ public partial class ShopDbContext : DbContext
                 .HasColumnName("pd_price");
             entity.Property(e => e.PdQuantity).HasColumnName("pd_quantity");
 
-            entity.HasOne(d => d.PdManufacturer).WithMany(p => p.Products)
-                .HasForeignKey(d => d.PdManufacturerId)
+            entity.HasOne(d => d.Manufacturer).WithMany(p => p.Products)
+                .HasForeignKey(d => d.ManufacturerId)
                 .HasConstraintName("FK_products_manufacturers");
         });
-
 
         modelBuilder.Entity<ProductCart>(entity =>
         {
@@ -191,37 +190,37 @@ public partial class ShopDbContext : DbContext
             entity.ToTable("product_carts");
 
             entity.Property(e => e.Id).HasColumnName("pc_id");
-            entity.Property(e => e.PcCart).HasColumnName("pc_cart");
+            entity.Property(e => e.CartId).HasColumnName("cart_id");
             entity.Property(e => e.PcPrice)
                 .HasColumnType("decimal(18, 0)")
                 .HasColumnName("pc_price");
-            entity.Property(e => e.PcProduct).HasColumnName("pc_product");
             entity.Property(e => e.PcQuantity).HasColumnName("pc_quantity");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
 
-            entity.HasOne(d => d.PcCartNavigation).WithMany(p => p.ProductCarts)
-                .HasForeignKey(d => d.PcCart)
+            entity.HasOne(d => d.Cart).WithMany(p => p.ProductCarts)
+                .HasForeignKey(d => d.CartId)
                 .HasConstraintName("FK_product_carts_carts");
 
-            entity.HasOne(d => d.PcProductNavigation).WithMany(p => p.ProductCarts)
-                .HasForeignKey(d => d.PcProduct)
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductCarts)
+                .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK_product_carts_products");
         });
 
-        modelBuilder.Entity<ProductCatergory>(entity =>
+        modelBuilder.Entity<ProductCategory>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.Id).HasName("PK_product_catergories");
 
-            entity.ToTable("product_catergories");
+            entity.ToTable("product_categories");
 
             entity.Property(e => e.Id).HasColumnName("pct_id");
-            entity.Property(e => e.CategoryId).HasColumnName("pct_category_id");
-            entity.Property(e => e.ProductId).HasColumnName("pct_product_id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
 
-            entity.HasOne(d => d.PctCategory).WithMany(p => p.ProductCatergories)
+            entity.HasOne(d => d.Category).WithMany(p => p.ProductCategories)
                 .HasForeignKey(d => d.CategoryId)
                 .HasConstraintName("FK_product_catergories_categories_1");
 
-            entity.HasOne(d => d.PctProduct).WithMany(p => p.ProductCatergories)
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductCategories)
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK_product_catergories_products");
         });
@@ -233,19 +232,19 @@ public partial class ShopDbContext : DbContext
             entity.ToTable("product_orders");
 
             entity.Property(e => e.Id).HasColumnName("po_id");
-            entity.Property(e => e.PoOrderId).HasColumnName("po_order_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.PoPrice)
                 .HasColumnType("decimal(18, 0)")
                 .HasColumnName("po_price");
-            entity.Property(e => e.PoProductId).HasColumnName("po_product_id");
             entity.Property(e => e.PoQuantity).HasColumnName("po_quantity");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
 
-            entity.HasOne(d => d.PoOrder).WithMany(p => p.ProductOrders)
-                .HasForeignKey(d => d.PoOrderId)
+            entity.HasOne(d => d.Order).WithMany(p => p.ProductOrders)
+                .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_product_orders_orders_1");
 
-            entity.HasOne(d => d.PoProduct).WithMany(p => p.ProductOrders)
-                .HasForeignKey(d => d.PoProductId)
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductOrders)
+                .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK_product_orders_products");
         });
 
@@ -269,13 +268,13 @@ public partial class ShopDbContext : DbContext
                 .HasMaxLength(10)
                 .HasColumnName("rp_payment");
             entity.Property(e => e.RpQuantity).HasColumnName("rp_quantity");
-            entity.Property(e => e.RpShippingId).HasColumnName("rp_shipping_id");
             entity.Property(e => e.RpTotal)
                 .HasColumnType("decimal(18, 0)")
                 .HasColumnName("rp_total");
+            entity.Property(e => e.ShippingId).HasColumnName("shipping_id");
 
-            entity.HasOne(d => d.RpShipping).WithMany(p => p.Receipts)
-                .HasForeignKey(d => d.RpShippingId)
+            entity.HasOne(d => d.Shipping).WithMany(p => p.Receipts)
+                .HasForeignKey(d => d.ShippingId)
                 .HasConstraintName("FK_receipts_shipings");
         });
 
@@ -286,18 +285,18 @@ public partial class ShopDbContext : DbContext
             entity.ToTable("shipings");
 
             entity.Property(e => e.Id).HasColumnName("sh_id");
+            entity.Property(e => e.CountryId).HasColumnName("country_id");
             entity.Property(e => e.ShAdress)
                 .HasMaxLength(100)
                 .HasColumnName("sh_adress");
-            entity.Property(e => e.ShCountryId).HasColumnName("sh_country_id");
-            entity.Property(e => e.ShShippingCompanyId).HasColumnName("sh_shipping_company_id");
+            entity.Property(e => e.ShippingCompanyId).HasColumnName("shipping_company_id");
 
-            entity.HasOne(d => d.ShCountry).WithMany(p => p.Shipings)
-                .HasForeignKey(d => d.ShCountryId)
+            entity.HasOne(d => d.Country).WithMany(p => p.Shipings)
+                .HasForeignKey(d => d.CountryId)
                 .HasConstraintName("FK_shipings_countries");
 
-            entity.HasOne(d => d.ShShippingCompany).WithMany(p => p.Shipings)
-                .HasForeignKey(d => d.ShShippingCompanyId)
+            entity.HasOne(d => d.ShippingCompany).WithMany(p => p.Shipings)
+                .HasForeignKey(d => d.ShippingCompanyId)
                 .HasConstraintName("FK_shipings_shipping_companies");
         });
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ShopDomain.Model;
 
-public partial class ProductCatergory : Entity
+public partial class ProductCategory : Entity
 {
     //public int PctId { get; set; }
 
@@ -11,7 +11,7 @@ public partial class ProductCatergory : Entity
 
     public int? CategoryId { get; set; }
 
-    public virtual Category? PctCategory { get; set; }
+    public virtual Category? Category { get; set; }
 
-    public virtual Product? PctProduct { get; set; }
+    public virtual Product? Product { get; set; }
 }
