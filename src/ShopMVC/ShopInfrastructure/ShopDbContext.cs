@@ -214,15 +214,15 @@ public partial class ShopDbContext : DbContext
             entity.ToTable("product_catergories");
 
             entity.Property(e => e.Id).HasColumnName("pct_id");
-            entity.Property(e => e.PctCategoryId).HasColumnName("pct_category_id");
-            entity.Property(e => e.PctProductId).HasColumnName("pct_product_id");
+            entity.Property(e => e.CategoryId).HasColumnName("pct_category_id");
+            entity.Property(e => e.ProductId).HasColumnName("pct_product_id");
 
             entity.HasOne(d => d.PctCategory).WithMany(p => p.ProductCatergories)
-                .HasForeignKey(d => d.PctCategoryId)
+                .HasForeignKey(d => d.CategoryId)
                 .HasConstraintName("FK_product_catergories_categories_1");
 
             entity.HasOne(d => d.PctProduct).WithMany(p => p.ProductCatergories)
-                .HasForeignKey(d => d.PctProductId)
+                .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK_product_catergories_products");
         });
 

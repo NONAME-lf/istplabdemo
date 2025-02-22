@@ -24,12 +24,17 @@ namespace ShopInfrastructure.Controllers
         // GET: Products
         public async Task<IActionResult> Index(int? id, string? name)
         {
-            // if (id == null) return RedirectToAction("Categories", "Index");
-            // ViewBag.CategoryId = id;
-            // ViewBag.CategoryName = name;
-            // var productByCategory = _context.Products.Where(b => b.CategoryId == id).Include(b => b.Category);
-            //
-            // return View(await productByCategory.ToListAsync());
+            if (id == null) return RedirectToAction("Categories", "Index");
+            ViewBag.CategoryId = id;
+            ViewBag.CategoryName = name;
+            var productByCategory = _context.Products
+                .Include(p => p.ProductCatergories)
+                    .ThenInclude(pc => pc.PctCategory)
+                .Where(b => b.ProductCatergories.Any(pc => pc.CategoryId == id));
+            
+            return View(await productByCategory.ToListAsync());
+            
+            
             var shopDbContext = _context.Products.Include(p => p.PdManufacturer);
             return View(await shopDbContext.ToListAsync());
         }

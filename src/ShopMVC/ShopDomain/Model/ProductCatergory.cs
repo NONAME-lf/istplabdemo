@@ -7,9 +7,9 @@ public partial class ProductCatergory : Entity
 {
     //public int PctId { get; set; }
 
-    public int? PctProductId { get; set; }
+    public int? ProductId { get; set; }
 
-    public int? PctCategoryId { get; set; }
+    public int? CategoryId { get; set; }
 
     public virtual Category? PctCategory { get; set; }
 

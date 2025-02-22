@@ -26,4 +26,12 @@
       <ProjectReference Include="..\ShopDomain\ShopDomain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\ProductCategories\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\ProductCategories\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\ProductCategories\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\ProductCategories\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\ProductCategories\Index.cshtml" />
+    </ItemGroup>
+
 </Project>

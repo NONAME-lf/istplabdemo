@@ -1,10 +1,10 @@
 @model IEnumerable<ShopDomain.Model.Product>
 
 @{
-    ViewData["Title"] = "Книги за категорією";
+    ViewData["Title"] = "Продукти за категорією";
 }
 
-<h1>Книги за категорією @ViewBag.CategoryName</h1>
+<h1>Продуктиги за категорією @ViewBag.CategoryId</h1>
 
 <p>
     <a asp-action="Create" asp-route-id="@ViewBag.CategoryId">Додати новий продукт</a>
