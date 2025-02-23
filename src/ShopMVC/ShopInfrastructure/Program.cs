@@ -10,7 +10,14 @@ builder.Services.AddDbContext<ShopDbContext>(option => option.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 
+
 var app = builder.Build();
+
+app.MapControllerRoute(
+    name: "products_create",
+    pattern: "Products/Create/{categoryId?}",
+    defaults: new { controller = "Products", action = "Create" });
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

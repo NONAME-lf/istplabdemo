@@ -10,7 +10,7 @@ public partial class Product : Entity
     //public int PdId { get; set; }
 
     [Display (Name = "Продукт")]
-    //[Required(ErrorMessage = "Поле не повино бути пустим")]
+    [Required(ErrorMessage = "Поле не повино бути пустим")]
     public string? PdName { get; set; }
     
     [Display (Name = "Ціна")]
