@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopDomain.Model;
 
 public partial class Country : Entity
 {
-    //public int CoId { get; set; }
+    //virtual public int Id { get; set; }
 
+    [Display (Name = "Країна")]
     public string? CoName { get; set; }
 
     public virtual ICollection<Manufacturer> Manufacturers { get; set; } = new List<Manufacturer>();

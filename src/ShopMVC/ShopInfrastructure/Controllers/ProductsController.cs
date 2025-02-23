@@ -25,6 +25,7 @@ namespace ShopInfrastructure.Controllers
             var productByCategory = _context.Products
                 .Include(p => p.ProductCategories)
                 .ThenInclude(pc => pc.Category)
+                .Include(pc => pc.Manufacturer)
                 .Where(b => b.ProductCategories.Any(pc => pc.CategoryId == id));
             
             return View(await productByCategory.ToListAsync());
@@ -59,7 +60,7 @@ namespace ShopInfrastructure.Controllers
         {
             ViewBag.CategoryId = categoryId;
             ViewBag.CategoryName = _context.Categories.Where(c => c.Id == categoryId).FirstOrDefault().CgName;
-            ViewData["ManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id");
+            ViewData["ManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "MnName");
             return View();
         }
 
@@ -81,6 +82,7 @@ namespace ShopInfrastructure.Controllers
                await _context.SaveChangesAsync();
                return RedirectToAction(nameof(Index), new { id = categoryId, name = _context.Categories.Where(c => c.Id == categoryId).FirstOrDefault().CgName });
            }
+           ViewData["ManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "MnName", product.ManufacturerId);
            return RedirectToAction(nameof(Index), new { id = categoryId, name = _context.Categories.Where(c => c.Id == categoryId).FirstOrDefault().CgName });
         }
 
@@ -98,7 +100,7 @@ namespace ShopInfrastructure.Controllers
             {
                 return NotFound();
             }
-            ViewData["ManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.ManufacturerId);
+            ViewData["ManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "MnName", product.ManufacturerId);
             return View(product);
         }
 
@@ -134,7 +136,7 @@ namespace ShopInfrastructure.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "Id", product.ManufacturerId);
+            ViewData["ManufacturerId"] = new SelectList(_context.Manufacturers, "Id", "MnName", product.ManufacturerId);
             return View(product);
         }
 
