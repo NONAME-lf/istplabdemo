@@ -10,8 +10,12 @@ builder.Services.AddDbContext<ShopDbContext>(option => option.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 
+builder.Services.AddDistributedMemoryCache(); // Необхідно для сесій
+builder.Services.AddSession(); // Додаємо сесії
 
 var app = builder.Build();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "products_create",

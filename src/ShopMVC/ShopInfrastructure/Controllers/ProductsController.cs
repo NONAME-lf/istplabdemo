@@ -14,7 +14,47 @@ namespace ShopInfrastructure.Controllers
         {
             _context = context;
         }
+        
+        [HttpPost]
+        public IActionResult AddToCart(int productId)
+        {
+            string cartId = Request.Cookies["CartId"];
 
+            if (string.IsNullOrEmpty(cartId))
+            {
+                // Якщо немає - створюємо новий кошик
+                var cart = new Cart();
+                _context.Carts.Add(cart);
+                _context.SaveChanges();
+
+                // Зберігаємо його ID в Cookies
+                Response.Cookies.Append("CartId", cart.Id.ToString(), 
+                    new CookieOptions { Expires = DateTime.UtcNow.AddDays(7) });
+
+                cartId = cart.Id.ToString();
+            }
+
+            // Перевіряємо, чи є товар у кошику
+            int parsedCartId = int.Parse(cartId);
+            var existingProductCart = _context.ProductCarts
+                .FirstOrDefault(pc => pc.CartId == parsedCartId && pc.ProductId == productId);
+
+            if (existingProductCart == null)
+            {
+                // Додаємо товар у кошик
+                var productCart = new ProductCart
+                {
+                    CartId = parsedCartId,
+                    ProductId = productId
+                };
+
+                _context.ProductCarts.Add(productCart);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Index", "Carts", new { id = parsedCartId });
+        }
+        
         // GET: Products
         // GET: Products
         public async Task<IActionResult> Index(int? id, string? name)
@@ -180,5 +220,7 @@ namespace ShopInfrastructure.Controllers
         {
             return _context.Products.Any(e => e.Id == id);
         }
+        
+        
     }
 }
