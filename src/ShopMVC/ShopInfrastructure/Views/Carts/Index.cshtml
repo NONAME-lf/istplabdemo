@@ -1,4 +1,6 @@
-@model ShopDomain.Model.Cart
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model ShopDomain.Model.Cart?
 
 @{
     ViewData["Title"] = "Продукти у кошику";
@@ -30,6 +32,8 @@
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="RemoveProduct" asp-controller="Carts"
+                   asp-route-cartId="@Model.Id" asp-route-productId="@item.Id">Видалити</a>
             </td>
         </tr>
     }

@@ -74,7 +74,22 @@ namespace ShopInfrastructure.Controllers
             return RedirectToAction("Index", "Carts");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> RemoveProduct(int cartId, int productId)
+        {
+            var productCart = await _context.ProductCarts
+                .FirstOrDefaultAsync(pc => pc.CartId == cartId && pc.ProductId == productId);
 
+            if (productCart != null)
+            {
+                _context.ProductCarts.Remove(productCart);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index)); // Або перенаправити на кошик
+        }
+
+        
         [HttpGet]
         // GET: Carts
         public async Task<IActionResult> Index(/*int? id, string? name*/)
@@ -83,7 +98,12 @@ namespace ShopInfrastructure.Controllers
                 .Include(c => c.ProductCarts)
                 .ThenInclude(pc => pc.Product)
                 .FirstOrDefaultAsync(); // Поки без користувачів, просто беремо перший кошик
-    
+            if (cart == null)
+            {
+                cart = new Cart();
+                _context.Carts.Add(cart);
+                await _context.SaveChangesAsync();
+            }
             return View(cart);
             
             // if (id == null) return RedirectToAction("Index", "Categories");
