@@ -43,6 +43,36 @@ namespace ShopInfrastructure.Controllers
         }
         
         [HttpPost]
+        public async Task<IActionResult> RemoveProduct(int productId)
+        {
+            var cartId = HttpContext.Session.GetInt32("CartId");
+
+            if (cartId == null)
+            {
+                Console.WriteLine("cartId is null in session!");
+                return RedirectToAction(nameof(Index));
+            }
+
+            Console.WriteLine($"Cart ID from session: {cartId}");
+
+            var productCart = await _context.ProductCarts
+                .FirstOrDefaultAsync(pc => pc.CartId == cartId && pc.ProductId == productId);
+
+            if (productCart == null)
+            {
+                Console.WriteLine($"Product with ID {productId} not found in cart {cartId}");
+            }
+            else
+            {
+                Console.WriteLine($"Found product {productCart.ProductId} in cart {productCart.CartId}. Removing...");
+                _context.ProductCarts.Remove(productCart);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
         public async Task<IActionResult> AddToCart(int productId)
         {
             var product = await _context.Products.FindAsync(productId);
@@ -74,21 +104,6 @@ namespace ShopInfrastructure.Controllers
             return RedirectToAction("Index", "Carts");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RemoveProduct(int cartId, int productId)
-        {
-            var productCart = await _context.ProductCarts
-                .FirstOrDefaultAsync(pc => pc.CartId == cartId && pc.ProductId == productId);
-
-            if (productCart != null)
-            {
-                _context.ProductCarts.Remove(productCart);
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToAction(nameof(Index)); // Або перенаправити на кошик
-        }
-
         
         [HttpGet]
         // GET: Carts
@@ -103,39 +118,18 @@ namespace ShopInfrastructure.Controllers
                 cart = new Cart();
                 _context.Carts.Add(cart);
                 await _context.SaveChangesAsync();
+                HttpContext.Session.SetInt32("CartId", cart.Id);
             }
             return View(cart);
-            
-            // if (id == null) return RedirectToAction("Index", "Categories");
-            // ViewBag.ProductId = id;
-            // ViewBag.ProductName = name;
-            // var productInCart = _context.Carts
-            //     .Include(p => p.ProductCarts)
-            //     .ThenInclude(pc => pc.Product)
-            //     //.Include(pc => pc.Manufacturer)
-            //     .Where(b => b.ProductCarts.Any(pc => pc.ProductId == id));
-            //
-            // return View(await productInCart.ToListAsync());
-            
-            // var cartItems = await _context.ProductCarts
-            //     .Include(pc => pc.Product)
-            //     .ToListAsync();
-            // return View(cartItems);
-            
-            //var shopDbContext = _context.Carts.Include(c => c.User);
-            //return View(await shopDbContext.ToListAsync());
         }
 
         // GET: Carts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return RedirectToAction("Index", "Categories");
 
             var cart = await _context.Carts
-                .Include(c => c.User)
+                .Include(c => c.ProductCarts)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (cart == null)
             {
