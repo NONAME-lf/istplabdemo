@@ -49,14 +49,11 @@ namespace ShopInfrastructure.Controllers
 
             if (cartId == null)
             {
-                Console.WriteLine("cartId is null in session!");
                 return RedirectToAction(nameof(Index));
             }
-
-            Console.WriteLine($"Cart ID from session: {cartId}");
-
+           
             var productCart = await _context.ProductCarts
-                .FirstOrDefaultAsync(pc => pc.CartId == cartId && pc.ProductId == productId);
+                .FirstOrDefaultAsync(pc => pc.CartId == cartId && pc.Id == productId);
 
             if (productCart == null)
             {
@@ -92,14 +89,19 @@ namespace ShopInfrastructure.Controllers
             var productCart = cart.ProductCarts.FirstOrDefault(pc => pc.ProductId == productId);
             if (productCart == null)
             {
-                productCart = new ProductCart { Cart = cart, Product = product, PcQuantity = 1, PcPrice = product.PdPrice };
-                cart.ProductCarts.Add(productCart);
+                productCart = new ProductCart 
+                { 
+                    CartId = cart.Id, 
+                    ProductId = product.Id, 
+                    PcQuantity = 1, 
+                    PcPrice = product.PdPrice 
+                };
+                _context.ProductCarts.Add(productCart); // Додаємо напряму в DbSet
             }
             else
             {
                 productCart.PcQuantity++;
             }
-
             await _context.SaveChangesAsync();
             return RedirectToAction("Index", "Carts");
         }
@@ -120,6 +122,7 @@ namespace ShopInfrastructure.Controllers
                 await _context.SaveChangesAsync();
                 HttpContext.Session.SetInt32("CartId", cart.Id);
             }
+            HttpContext.Session.SetInt32("CartId", cart.Id);
             return View(cart);
         }
 
