@@ -20,27 +20,27 @@ namespace ShopInfrastructure.Controllers
         }
 
         
-        public async Task<Cart> GetOrCreateCart()
-        {
-            var cartId = HttpContext.Session.GetInt32("CartId");
-
-            if (cartId == null)
-            {
-                var newCart = new Cart();
-                _context.Carts.Add(newCart);
-                await _context.SaveChangesAsync();
-
-                HttpContext.Session.SetInt32("CartId", newCart.Id);
-                return newCart;
-            }
-
-            var cart = await _context.Carts
-                .Include(c => c.ProductCarts)
-                .ThenInclude(pc => pc.Product)
-                .FirstOrDefaultAsync(c => c.Id == cartId);
-
-            return cart ?? throw new Exception("Кошик не знайдено.");
-        }
+        // public async Task<Cart> GetOrCreateCart()
+        // {
+        //     var cartId = HttpContext.Session.GetInt32("CartId");
+        //
+        //     if (cartId == null)
+        //     {
+        //         var newCart = new Cart();
+        //         _context.Carts.Add(newCart);
+        //         await _context.SaveChangesAsync();
+        //
+        //         HttpContext.Session.SetInt32("CartId", newCart.Id);
+        //         return newCart;
+        //     }
+        //
+        //     var cart = await _context.Carts
+        //         .Include(c => c.ProductCarts)
+        //         .ThenInclude(pc => pc.Product)
+        //         .FirstOrDefaultAsync(c => c.Id == cartId);
+        //
+        //     return cart ?? throw new Exception("Кошик не знайдено.");
+        // }
         
         [HttpPost]
         public async Task<IActionResult> RemoveProduct(int productId)
@@ -70,8 +70,10 @@ namespace ShopInfrastructure.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int productId)
+        public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
+            if (quantity < 1) quantity = 1; // Переконуємось, що кількість >= 1
+
             var product = await _context.Products.FindAsync(productId);
             if (product == null) return NotFound();
 
@@ -89,19 +91,21 @@ namespace ShopInfrastructure.Controllers
             var productCart = cart.ProductCarts.FirstOrDefault(pc => pc.ProductId == productId);
             if (productCart == null)
             {
-                productCart = new ProductCart 
-                { 
-                    CartId = cart.Id, 
-                    ProductId = product.Id, 
-                    PcQuantity = 1, 
-                    PcPrice = product.PdPrice 
+                productCart = new ProductCart
+                {
+                    CartId = cart.Id,
+                    ProductId = product.Id,
+                    PcQuantity = quantity,  // Використовуємо введену кількість
+                    PcPrice = product.PdPrice * quantity
                 };
-                _context.ProductCarts.Add(productCart); // Додаємо напряму в DbSet
+                _context.ProductCarts.Add(productCart);
             }
             else
             {
-                productCart.PcQuantity++;
+                productCart.PcQuantity += quantity;  // Додаємо до вже наявної кількості
+                productCart.PcPrice += product.PdPrice * quantity; // Оновлюємо загальну ціну
             }
+
             await _context.SaveChangesAsync();
             return RedirectToAction("Index", "Carts");
         }

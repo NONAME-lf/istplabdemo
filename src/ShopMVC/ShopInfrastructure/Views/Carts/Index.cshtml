@@ -31,11 +31,19 @@
             <td>
                 <form asp-action="RemoveProduct" asp-controller="Carts" method="post">
                     <input type="hidden" name="productId" value="@item.Id" />
-                    <button type="submit">Видалити</button>
+                    <button type="submit" class="btn btn-primary">Видалити</button>
                 </form>
             </td>
-
         </tr>
     }
+    <td>
+        <form asp-action="CreateOrderFromCart" asp-controller="Orders" method="post">
+            <button type="submit" class="btn btn-success">Оформити замовлення</button>
+        </form>
+    </td>
+    <td>
+        <a asp-action="Index" asp-controller="Orders" class="btn btn-info">Переглянути замовлення</a>
+    </td>
+    
     </tbody>
 </table>
