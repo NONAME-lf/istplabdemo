@@ -19,71 +19,109 @@ namespace ShopInfrastructure.Controllers
             _context = context;
         }
 
-        public Order CreateOrder(int userId)
+        [HttpPost]
+        public async Task<IActionResult> Checkout(string paymentMethod, string? cardNumber, string? orderNotes)
         {
-            Console.WriteLine("Оберіть спосіб оплати (1 - Credit Card, 2 - PayPal, 3 - Cash on Delivery):");
-            string? paymentMethod = Console.ReadLine();
-    
-            Console.WriteLine("Додайте нотатки (якщо потрібно):");
-            string? notes = Console.ReadLine();
-    
-            Console.WriteLine("Оберіть спосіб доставки (1 - DHL, 2 - FedEx, 3 - UPS):");
-            int shippingOption = int.Parse(Console.ReadLine());
+            var cartId = HttpContext.Session.GetInt32("CartId");
 
-            var shipping = new Shiping
+            if (cartId == null)
             {
-                ShippingCompanyId = shippingOption
-            };
+                return RedirectToAction("Index", "Carts");
+            }
 
+            var cart = await _context.Carts
+                .Include(c => c.ProductCarts)
+                .ThenInclude(pc => pc.Product)
+                .FirstOrDefaultAsync(c => c.Id == cartId);
+
+            if (cart == null || !cart.ProductCarts.Any())
+            {
+                return RedirectToAction("Index", "Carts");
+            }
+
+            // Створення замовлення
             var order = new Order
             {
-                //UserId = userId,
-                OdPayment = paymentMethod,
-                OdNotes = notes,
-                Shipping = shipping
+                OdUser = null,  
+                OdTotal = cart.ProductCarts.Sum(pc => pc.PcPrice),
+                OdPayment = paymentMethod == "card" ? cardNumber : "cash",
+                OdNotes = orderNotes,
+                ShippingId = null,  
+                ProductOrders = cart.ProductCarts.Select(pc => new ProductOrder
+                {
+                    ProductId = pc.ProductId,
+                    PoPrice = pc.PcPrice,
+                    PoQuantity = pc.PcQuantity
+                }).ToList()
             };
 
-            // Додати замовлення в базу
             _context.Orders.Add(order);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return order;
+            // Очищення кошика
+            _context.ProductCarts.RemoveRange(cart.ProductCarts);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
+
+        public class ProductViewModel
+        {
+            public string Name { get; set; }
+            public decimal? Price { get; set; }
+            public string Description { get; set; }
+        }
+        
+        public class OrderViewModel
+        {
+            public int Id { get; set; }
+            public decimal? OdTotal { get; set; }
+            public List<ProductViewModel> Products { get; set; } = new();
+        }
+
+        
         
         // GET: Orders
         public async Task<IActionResult> Index()
         {
-            var shopDbContext = _context.Orders.Include(o => o.OdUserNavigation).Include(o => o.Protuct).Include(o => o.Receipt).Include(o => o.Shipping);
+            var shopDbContext = _context.Orders.Include(o => o.OdUserNavigation).Include(o => o.Product).Include(o => o.Receipt).Include(o => o.Shipping);
             return View(await shopDbContext.ToListAsync());
         }
 
         // GET: Orders/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            var orderWithProducts = await _context.Orders
+                .Where(o => o.Id == id)
+                .Include(o => o.ProductOrders)
+                .ThenInclude(po => po.Product)
+                .Select(o => new OrderViewModel
+                {
+                    Id = o.Id,
+                    OdTotal = o.OdTotal,
+                    Products = o.ProductOrders.Select(po => new ProductViewModel
+                    {
+                        Name = po.Product.PdName,
+                        Price = po.Product.PdPrice,
+                        Description = po.Product.PdAbout
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (orderWithProducts == null)
             {
                 return NotFound();
             }
 
-            var order = await _context.Orders
-                .Include(o => o.OdUserNavigation)
-                .Include(o => o.Protuct)
-                .Include(o => o.Receipt)
-                .Include(o => o.Shipping)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return View(order);
+            return View(orderWithProducts);
         }
+
 
         // GET: Orders/Create
         public IActionResult Create()
         {
             ViewData["OdUser"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["ProtuctId"] = new SelectList(_context.Products, "Id", "PdName");
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "PdName");
             ViewData["ReceiptId"] = new SelectList(_context.Receipts, "Id", "Id");
             ViewData["ShippingId"] = new SelectList(_context.Shipings, "Id", "Id");
             return View();
@@ -94,7 +132,7 @@ namespace ShopInfrastructure.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("OdUser,OdTotal,OdDiscount,OdPayment,OdNotes,ReceiptId,ProtuctId,ShippingId,Id")] Order order)
+        public async Task<IActionResult> Create([Bind("OdUser,OdTotal,OdDiscount,OdPayment,OdNotes,ReceiptId,ProductId,ShippingId,Id")] Order order)
         {
             if (ModelState.IsValid)
             {
@@ -103,7 +141,7 @@ namespace ShopInfrastructure.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["OdUser"] = new SelectList(_context.Users, "Id", "Id", order.OdUser);
-            ViewData["ProtuctId"] = new SelectList(_context.Products, "Id", "PdName", order.ProtuctId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "PdName", order.ProductId);
             ViewData["ReceiptId"] = new SelectList(_context.Receipts, "Id", "Id", order.ReceiptId);
             ViewData["ShippingId"] = new SelectList(_context.Shipings, "Id", "Id", order.ShippingId);
             return View(order);
@@ -123,7 +161,7 @@ namespace ShopInfrastructure.Controllers
                 return NotFound();
             }
             ViewData["OdUser"] = new SelectList(_context.Users, "Id", "Id", order.OdUser);
-            ViewData["ProtuctId"] = new SelectList(_context.Products, "Id", "PdName", order.ProtuctId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "PdName", order.ProductId);
             ViewData["ReceiptId"] = new SelectList(_context.Receipts, "Id", "Id", order.ReceiptId);
             ViewData["ShippingId"] = new SelectList(_context.Shipings, "Id", "Id", order.ShippingId);
             return View(order);
@@ -134,7 +172,7 @@ namespace ShopInfrastructure.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("OdUser,OdTotal,OdDiscount,OdPayment,OdNotes,ReceiptId,ProtuctId,ShippingId,Id")] Order order)
+        public async Task<IActionResult> Edit(int id, [Bind("OdUser,OdTotal,OdDiscount,OdPayment,OdNotes,ReceiptId,ProductId,ShippingId,Id")] Order order)
         {
             if (id != order.Id)
             {
@@ -162,7 +200,7 @@ namespace ShopInfrastructure.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["OdUser"] = new SelectList(_context.Users, "Id", "Id", order.OdUser);
-            ViewData["ProtuctId"] = new SelectList(_context.Products, "Id", "PdName", order.ProtuctId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "PdName", order.ProductId);
             ViewData["ReceiptId"] = new SelectList(_context.Receipts, "Id", "Id", order.ReceiptId);
             ViewData["ShippingId"] = new SelectList(_context.Shipings, "Id", "Id", order.ShippingId);
             return View(order);
@@ -178,7 +216,7 @@ namespace ShopInfrastructure.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.OdUserNavigation)
-                .Include(o => o.Protuct)
+                .Include(o => o.Product)
                 .Include(o => o.Receipt)
                 .Include(o => o.Shipping)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -198,12 +236,19 @@ namespace ShopInfrastructure.Controllers
             var order = await _context.Orders.FindAsync(id);
             if (order != null)
             {
+                // Видаляємо всі записи з ProductOrders, які пов'язані з цим Order
+                var productOrders = _context.ProductOrders.Where(po => po.OrderId == id);
+                _context.ProductOrders.RemoveRange(productOrders);
+
+                // Видаляємо саме замовлення
                 _context.Orders.Remove(order);
+
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
 
         private bool OrderExists(int id)
         {

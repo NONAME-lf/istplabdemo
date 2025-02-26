@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopDomain.Model;
 
@@ -8,26 +9,26 @@ public partial class Order : Entity
     //public int OdId { get; set; }
 
     public int? OdUser { get; set; }
-
+    [Display (Name="Всього")]
     public decimal? OdTotal { get; set; }
-
+    [Display (Name = "Знижка")]
     public double? OdDiscount { get; set; }
-
+    [Display (Name = "Оплата")]
     public string? OdPayment { get; set; }
-
+    [Display (Name = "Нотатки")]
     public string? OdNotes { get; set; }
 
     public int? ReceiptId { get; set; }
 
-    public int? ProtuctId { get; set; }
+    public int? ProductId { get; set; }
 
     public int? ShippingId { get; set; }
-
+    [Display (Name="")]
     public virtual User? OdUserNavigation { get; set; }
 
     public virtual ICollection<ProductOrder> ProductOrders { get; set; } = new List<ProductOrder>();
-
-    public virtual Product? Protuct { get; set; }
+    [Display (Name="")]
+    public virtual Product? Product { get; set; }
 
     public virtual Receipt? Receipt { get; set; }
 

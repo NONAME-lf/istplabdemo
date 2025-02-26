@@ -36,14 +36,41 @@
             </td>
         </tr>
     }
-    <td>
-        <form asp-action="CreateOrderFromCart" asp-controller="Orders" method="post">
-            <button type="submit" class="btn btn-success">Оформити замовлення</button>
-        </form>
-    </td>
-    <td>
-        <a asp-action="Index" asp-controller="Orders" class="btn btn-info">Переглянути замовлення</a>
-    </td>
     
+    
+    
+    
+    <form asp-action="Checkout" asp-controller="Orders" method="post">
+        <div class="form-group">
+            <label for="paymentMethod">Метод оплати:</label>
+            <select id="paymentMethod" name="paymentMethod" class="form-control" required onchange="toggleCardField()">
+                <option value="cash">Готівка</option>
+                <option value="card">Картка</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="cardNumberField" style="display: none;">
+            <label for="cardNumber">Номер картки:</label>
+            <input type="text" id="cardNumber" name="cardNumber" class="form-control" pattern="\d{16}" placeholder="Введіть 16-значний номер картки">
+        </div>
+
+        <div class="form-group">
+            <label for="orderNotes">Нотатки:</label>
+            <textarea id="orderNotes" name="orderNotes" class="form-control"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success">Оформити замовлення</button>
+    </form>
+
+    <script>
+        function toggleCardField() {
+            var paymentMethod = document.getElementById("paymentMethod").value;
+            var cardField = document.getElementById("cardNumberField");
+            cardField.style.display = paymentMethod === "card" ? "block" : "none";
+        }
+    </script>
+    <a asp-action="Index" asp-controller="Orders" class="btn btn-info">Переглянути замовлення</a>
+
+
     </tbody>
 </table>

@@ -134,7 +134,7 @@ public partial class ShopDbContext : DbContext
                 .HasColumnType("decimal(18, 0)")
                 .HasColumnName("od_total");
             entity.Property(e => e.OdUser).HasColumnName("od_user");
-            entity.Property(e => e.ProtuctId).HasColumnName("protuct_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ReceiptId).HasColumnName("receipt_id");
             entity.Property(e => e.ShippingId).HasColumnName("shipping_id");
 
@@ -142,8 +142,8 @@ public partial class ShopDbContext : DbContext
                 .HasForeignKey(d => d.OdUser)
                 .HasConstraintName("FK_orders_users");
 
-            entity.HasOne(d => d.Protuct).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.ProtuctId)
+            entity.HasOne(d => d.Product).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK_orders_products");
 
             entity.HasOne(d => d.Receipt).WithMany(p => p.Orders)
