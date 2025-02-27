@@ -7,7 +7,9 @@ public partial class ShippingCompany : Entity
 {
     //public int ScId { get; set; }
 
-    public int? ScName { get; set; }
+    public virtual int Id { get; set; } 
+    
+    public string? ScName { get; set; }
 
     public decimal? ScPricing { get; set; }
 

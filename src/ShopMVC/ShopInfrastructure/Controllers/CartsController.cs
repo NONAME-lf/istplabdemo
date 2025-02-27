@@ -113,12 +113,13 @@ namespace ShopInfrastructure.Controllers
         
         [HttpGet]
         // GET: Carts
-        public async Task<IActionResult> Index(/*int? id, string? name*/)
+        public async Task<IActionResult> Index()
         {
             var cart = await _context.Carts
                 .Include(c => c.ProductCarts)
                 .ThenInclude(pc => pc.Product)
                 .FirstOrDefaultAsync(); // Поки без користувачів, просто беремо перший кошик
+
             if (cart == null)
             {
                 cart = new Cart();
@@ -126,7 +127,12 @@ namespace ShopInfrastructure.Controllers
                 await _context.SaveChangesAsync();
                 HttpContext.Session.SetInt32("CartId", cart.Id);
             }
+
             HttpContext.Session.SetInt32("CartId", cart.Id);
+
+            // Передаємо компанії доставки у ViewBag
+            ViewBag.ShippingCompanies = await _context.ShippingCompanies.ToListAsync();
+
             return View(cart);
         }
 

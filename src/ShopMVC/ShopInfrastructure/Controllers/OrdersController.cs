@@ -20,49 +20,86 @@ namespace ShopInfrastructure.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Checkout(string paymentMethod, string? cardNumber, string? orderNotes)
+public async Task<IActionResult> Checkout(string paymentMethod, string? cardNumber, string? orderNotes,
+    string shippingMethod, string? address, int? shippingCompanyId)
+{
+    var cartId = HttpContext.Session.GetInt32("CartId");
+
+    if (cartId == null)
+    {
+        return RedirectToAction("Index", "Carts");
+    }
+
+    var cart = await _context.Carts
+        .Include(c => c.ProductCarts)
+        .ThenInclude(pc => pc.Product)
+        .FirstOrDefaultAsync(c => c.Id == cartId);
+
+    if (cart == null || !cart.ProductCarts.Any())
+    {
+        return RedirectToAction("Index", "Carts");
+    }
+
+    // Якщо самовивіз — встановити адресу "Самовивіз"
+    address = shippingMethod == "pickup" ? "Самовивіз" : address;
+
+    // Створення Shipping
+    var shipping = new Shiping
+    {
+        ShAdress = address,
+        ShippingCompanyId = shippingMethod == "delivery" ? shippingCompanyId : null
+    };
+    _context.Shipings.Add(shipping);
+    await _context.SaveChangesAsync();
+
+    // Створення замовлення
+    var order = new Order
+    {
+        OdUser = null,
+        OdTotal = cart.ProductCarts.Sum(pc => pc.PcPrice),
+        OdPayment = paymentMethod == "card" ? cardNumber : "cash",
+        OdNotes = orderNotes,
+        ShippingId = shipping.Id,
+        ProductOrders = cart.ProductCarts.Select(pc => new ProductOrder
         {
-            var cartId = HttpContext.Session.GetInt32("CartId");
+            ProductId = pc.ProductId,
+            PoPrice = pc.PcPrice,
+            PoQuantity = pc.PcQuantity
+        }).ToList()
+    };
+    _context.Orders.Add(order);
+    await _context.SaveChangesAsync();
 
-            if (cartId == null)
-            {
-                return RedirectToAction("Index", "Carts");
-            }
+    // Створення Receipt
+    var receipt = new Receipt
+    {
+        RpDateCreated = DateTime.Now,
+        RpQuantity = cart.ProductCarts.Sum(pc => pc.PcQuantity),
+        RpTotal = order.OdTotal,
+        RpPayment = order.OdPayment,
+        RpAbout = order.OdNotes,
+        ShippingId = shipping.Id,
+        Orders = new List<Order> { order }
+    };
+    _context.Receipts.Add(receipt);
+    await _context.SaveChangesAsync();
 
-            var cart = await _context.Carts
-                .Include(c => c.ProductCarts)
-                .ThenInclude(pc => pc.Product)
-                .FirstOrDefaultAsync(c => c.Id == cartId);
+    // Очищення кошика
+    _context.ProductCarts.RemoveRange(cart.ProductCarts);
+    await _context.SaveChangesAsync();
 
-            if (cart == null || !cart.ProductCarts.Any())
-            {
-                return RedirectToAction("Index", "Carts");
-            }
+    return RedirectToAction(nameof(Index));
+}
 
-            // Створення замовлення
-            var order = new Order
-            {
-                OdUser = null,  
-                OdTotal = cart.ProductCarts.Sum(pc => pc.PcPrice),
-                OdPayment = paymentMethod == "card" ? cardNumber : "cash",
-                OdNotes = orderNotes,
-                ShippingId = null,  
-                ProductOrders = cart.ProductCarts.Select(pc => new ProductOrder
-                {
-                    ProductId = pc.ProductId,
-                    PoPrice = pc.PcPrice,
-                    PoQuantity = pc.PcQuantity
-                }).ToList()
-            };
-
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
-            // Очищення кошика
-            _context.ProductCarts.RemoveRange(cart.ProductCarts);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+        public class OrderViewModel
+        {
+            public int Id { get; set; }
+            public decimal? OdTotal { get; set; }
+            public string? OdPayment { get; set; }
+            public string? OdNotes { get; set; }
+            public List<ProductViewModel> Products { get; set; } = new List<ProductViewModel>();
+            public ShippingViewModel? Shipping { get; set; }
+            public ReceiptViewModel? Receipt { get; set; }
         }
 
         public class ProductViewModel
@@ -71,12 +108,20 @@ namespace ShopInfrastructure.Controllers
             public decimal? Price { get; set; }
             public string Description { get; set; }
         }
-        
-        public class OrderViewModel
+
+        public class ShippingViewModel
         {
-            public int Id { get; set; }
-            public decimal? OdTotal { get; set; }
-            public List<ProductViewModel> Products { get; set; } = new();
+            public string Address { get; set; }
+            public string ShippingCompany { get; set; }
+        }
+
+        public class ReceiptViewModel
+        {
+            public DateTime? DateCreated { get; set; }
+            public int? Quantity { get; set; }
+            public decimal? Total { get; set; }
+            public string? Payment { get; set; }
+            public string? About { get; set; }
         }
 
         
@@ -91,29 +136,47 @@ namespace ShopInfrastructure.Controllers
         // GET: Orders/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var orderWithProducts = await _context.Orders
+            var orderWithDetails = await _context.Orders
                 .Where(o => o.Id == id)
                 .Include(o => o.ProductOrders)
                 .ThenInclude(po => po.Product)
+                .Include(o => o.Shipping)
+                .ThenInclude(s => s.ShippingCompany)
+                .Include(o => o.Receipt)
                 .Select(o => new OrderViewModel
                 {
                     Id = o.Id,
                     OdTotal = o.OdTotal,
+                    OdPayment = o.OdPayment,
+                    OdNotes = o.OdNotes,
                     Products = o.ProductOrders.Select(po => new ProductViewModel
                     {
                         Name = po.Product.PdName,
                         Price = po.Product.PdPrice,
                         Description = po.Product.PdAbout
-                    }).ToList()
+                    }).ToList(),
+                    Shipping = o.Shipping != null ? new ShippingViewModel
+                    {
+                        Address = o.Shipping.ShAdress,
+                        ShippingCompany = o.Shipping.ShippingCompany != null ? o.Shipping.ShippingCompany.ScName : "Немає"
+                    } : null,
+                    Receipt = o.Receipt != null ? new ReceiptViewModel
+                    {
+                        DateCreated = o.Receipt.RpDateCreated,
+                        Quantity = o.Receipt.RpQuantity,
+                        Total = o.Receipt.RpTotal,
+                        Payment = o.Receipt.RpPayment,
+                        About = o.Receipt.RpAbout
+                    } : null
                 })
                 .FirstOrDefaultAsync();
 
-            if (orderWithProducts == null)
+            if (orderWithDetails == null)
             {
                 return NotFound();
             }
 
-            return View(orderWithProducts);
+            return View(orderWithDetails);
         }
 
 

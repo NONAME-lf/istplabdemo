@@ -61,10 +61,10 @@
                 @Html.DisplayFor(modelItem => item.Product.PdName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Receipt.Id)
+                Чек #@Html.DisplayFor(modelItem => item.Receipt.Id)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Shipping.Id)
+                @Html.DisplayFor(modelItem => item.Shipping.ShAdress)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
