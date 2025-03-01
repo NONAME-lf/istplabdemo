@@ -8,9 +8,7 @@
 
 <h1>Продукти у кошику @ViewBag.CartId</h1>
 
-<p>
-    @Html.ActionLink("Додати новий продукт", "Create", new { cartId = ViewBag.CartId })
-</p>
+
 
 <table class="table">
     <thead>
@@ -31,7 +29,7 @@
                 <td>
                     <form asp-action="RemoveProduct" asp-controller="Carts" method="post">
                         <input type="hidden" name="productId" value="@item.Id" />
-                        <button type="submit" class="btn btn-primary">Видалити</button>
+                        <button type="submit" class="btn btn-outline-danger">Видалити</button>
                     </form>
                 </td>
             </tr>
@@ -81,7 +79,7 @@
         <textarea id="orderNotes" name="orderNotes" class="form-control"></textarea>
     </div>
 
-    <button type="submit" class="btn btn-success">Оформити замовлення</button>
+    <button type="submit" class="btn btn-success my-2">Оформити замовлення</button>
 </form>
 
 <script>

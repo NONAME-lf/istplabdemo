@@ -48,21 +48,21 @@
                     <select asp-for="ManufacturerId" class="form-control" asp-items="ViewBag.ManufacturerId">
                         <option value="">-- Оберіть виробника --</option>
                     </select>
-                    <a asp-action="Create" asp-controller="Manufacturers" class="btn btn-primary ml-2">Додати</a>
+                    <a asp-action="Create" asp-controller="Manufacturers" class="btn btn-success  ms-2">Додати</a>
                 </div>
             </div>
             
             <input type="hidden" value="@ViewBag.CategoryId" name="CategoryId">
             
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary"/>
+                <input type="submit" value="Create" class="btn btn-primary my-2"/>
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-light">Back to List</a>
 </div>
 
 @section Scripts {

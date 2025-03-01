@@ -15,46 +15,6 @@ namespace ShopInfrastructure.Controllers
             _context = context;
         }
         
-        [HttpPost]
-        public IActionResult AddToCart(int productId)
-        {
-            string cartId = Request.Cookies["CartId"];
-
-            if (string.IsNullOrEmpty(cartId))
-            {
-                // Якщо немає - створюємо новий кошик
-                var cart = new Cart();
-                _context.Carts.Add(cart);
-                _context.SaveChanges();
-
-                // Зберігаємо його ID в Cookies
-                Response.Cookies.Append("CartId", cart.Id.ToString(), 
-                    new CookieOptions { Expires = DateTime.UtcNow.AddDays(7) });
-
-                cartId = cart.Id.ToString();
-            }
-
-            // Перевіряємо, чи є товар у кошику
-            int parsedCartId = int.Parse(cartId);
-            var existingProductCart = _context.ProductCarts
-                .FirstOrDefault(pc => pc.CartId == parsedCartId && pc.ProductId == productId);
-
-            if (existingProductCart == null)
-            {
-                // Додаємо товар у кошик
-                var productCart = new ProductCart
-                {
-                    CartId = parsedCartId,
-                    ProductId = productId
-                };
-
-                _context.ProductCarts.Add(productCart);
-                _context.SaveChanges();
-            }
-
-            return RedirectToAction("Index", "Carts", new { id = parsedCartId });
-        }
-        
         // GET: Products
         // GET: Products
         public async Task<IActionResult> Index(int? id, string? name)
@@ -207,12 +167,79 @@ namespace ShopInfrastructure.Controllers
             var product = await _context.Products.FindAsync(id);
             if (product != null)
             {
+                // Отримуємо всі замовлення, що містять цей продукт
+                var affectedOrders = _context.Orders
+                    .Where(o => o.ProductOrders.Any(po => po.ProductId == id))
+                    .ToList();
+
+                // Отримуємо всі чеки, що пов'язані з цими замовленнями
+                var affectedReceiptIds = affectedOrders.Select(o => o.ReceiptId).Distinct().ToList();
+                var affectedReceipts = _context.Receipts
+                    .Where(r => affectedReceiptIds.Contains(r.Id))
+                    .ToList();
+
+                // Видаляємо всі залежні записи з ProductOrders
+                var productOrders = _context.ProductOrders.Where(po => po.ProductId == id);
+                _context.ProductOrders.RemoveRange(productOrders);
+
+                // Видаляємо всі залежні записи з ProductCarts
+                var productCarts = _context.ProductCarts.Where(pc => pc.ProductId == id);
+                _context.ProductCarts.RemoveRange(productCarts);
+
+                // Видаляємо всі залежні записи з ProductCategories (якщо це потрібно)
                 var productCategories = _context.ProductCategories.Where(pc => pc.ProductId == id);
                 _context.ProductCategories.RemoveRange(productCategories);
+
+                await _context.SaveChangesAsync(); // Спочатку зберігаємо зміни, щоб видалити всі зв'язки
+
+                // Оновлюємо всі замовлення, які містили цей продукт
+                foreach (var order in affectedOrders)
+                {
+                    var remainingProducts = _context.ProductOrders
+                        .Where(po => po.OrderId == order.Id)
+                        .ToList();
+
+                    // **Виправлення:** Перераховуємо суму замовлення після видалення товару
+                    order.OdTotal = remainingProducts.Sum(po => (po.PoPrice ?? 0) );
+
+                    // Якщо в замовленні більше немає товарів, видаляємо його
+                    if (!remainingProducts.Any())
+                    {
+                        _context.Orders.Remove(order);
+                    }
+                }
+
+                await _context.SaveChangesAsync(); // **Зберігаємо зміни замовлень перед оновленням чеків**
+
+                // Оновлюємо чеки (Receipt), пов’язані із зміненими замовленнями
+                foreach (var receipt in affectedReceipts)
+                {
+                    var relatedOrders = _context.Orders.Where(o => o.ReceiptId == receipt.Id).ToList();
+
+                    if (!relatedOrders.Any())
+                    {
+                        _context.Receipts.Remove(receipt); // Видаляємо чек, якщо всі його замовлення зникли
+                    }
+                    else
+                    {
+                        // Загальна кількість товарів у чеку — сума всіх товарів у замовленнях
+                        receipt.RpQuantity = relatedOrders
+                            .Sum(o => _context.ProductOrders
+                                .Where(po => po.OrderId == o.Id)
+                                .Sum(po => po.PoQuantity ?? 0));
+
+                        // **Виправлення:** RpTotal має сумувати оновлені OdTotal
+                        receipt.RpTotal = relatedOrders.Sum(o => o.OdTotal ?? 0);
+                    }
+                }
+
+                await _context.SaveChangesAsync(); // **Зберігаємо оновлені дані чеків**
+
+                // Нарешті видаляємо сам продукт
                 _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

@@ -39,4 +39,9 @@
       <_ContentIncludedByDefault Remove="Views\Products\Index.cshtml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap_minty.css" />
+      <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap_minty.min.css" />
+    </ItemGroup>
+
 </Project>
