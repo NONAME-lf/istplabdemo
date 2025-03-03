@@ -28,18 +28,18 @@
                     <select asp-for="CountryId" class="form-control" asp-items="ViewBag.CountryId">
                         <option value="">-- Оберіть країну --</option>
                     </select>
-                    <a asp-action="Create" asp-controller="Countries" class="btn btn-primary ml-2">Додати</a>
+                    <a asp-action="Create" asp-controller="Countries" class="btn btn-outline-success ms-2 ml-2">Додати</a>
                 </div>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-success my-2" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-light">Back to List</a>
 </div>
 
 @section Scripts {

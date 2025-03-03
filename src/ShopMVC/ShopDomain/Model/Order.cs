@@ -29,8 +29,8 @@ public partial class Order : Entity
     public virtual ICollection<ProductOrder> ProductOrders { get; set; } = new List<ProductOrder>();
     [Display (Name="")]
     public virtual Product? Product { get; set; }
-
+    [Display (Name="Чек")]
     public virtual Receipt? Receipt { get; set; }
-
+    [Display (Name="Доставка")]
     public virtual Shiping? Shipping { get; set; }
 }

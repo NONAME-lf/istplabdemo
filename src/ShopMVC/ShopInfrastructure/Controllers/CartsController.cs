@@ -72,10 +72,17 @@ namespace ShopInfrastructure.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
-            if (quantity < 1) quantity = 1; // Переконуємось, що кількість >= 1
+            if (quantity < 1) quantity = 1; // Мінімальна кількість = 1
 
             var product = await _context.Products.FindAsync(productId);
             if (product == null) return NotFound();
+
+            // Перевіряємо, чи достатньо товару на складі
+            if (product.PdQuantity < quantity)
+            {
+                TempData["Error"] = "Недостатня кількість товару на складі!";
+                return RedirectToAction("Index", "Carts");
+            }
 
             var cart = await _context.Carts
                 .Include(c => c.ProductCarts)
@@ -95,15 +102,22 @@ namespace ShopInfrastructure.Controllers
                 {
                     CartId = cart.Id,
                     ProductId = product.Id,
-                    PcQuantity = quantity,  // Використовуємо введену кількість
+                    PcQuantity = quantity,  
                     PcPrice = product.PdPrice * quantity
                 };
                 _context.ProductCarts.Add(productCart);
             }
             else
             {
-                productCart.PcQuantity += quantity;  // Додаємо до вже наявної кількості
-                productCart.PcPrice += product.PdPrice * quantity; // Оновлюємо загальну ціну
+                // **Перевіряємо, чи можна додати ще**
+                if (product.PdQuantity < productCart.PcQuantity + quantity)
+                {
+                    TempData["Error"] = "Недостатньо товару!";
+                    return RedirectToAction("Index", "Carts");
+                }
+
+                productCart.PcQuantity += quantity;  
+                productCart.PcPrice += product.PdPrice * quantity; 
             }
 
             await _context.SaveChangesAsync();

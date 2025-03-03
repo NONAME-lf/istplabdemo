@@ -139,13 +139,23 @@ namespace ShopInfrastructure.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var country = await _context.Countries.FindAsync(id);
-            if (country != null)
+            var country = await _context.Countries
+                .Include(c => c.Manufacturers)
+                .Include(c => c.Shipings)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (country == null)
             {
-                _context.Countries.Remove(country);
+                return NotFound();
             }
 
+            // Видаляємо всі пов'язані об'єкти вручну
+            _context.Manufacturers.RemoveRange(country.Manufacturers);
+            _context.Shipings.RemoveRange(country.Shipings);
+
+            _context.Countries.Remove(country);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

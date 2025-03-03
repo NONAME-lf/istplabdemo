@@ -199,7 +199,6 @@ namespace ShopInfrastructure.Controllers
                         .Where(po => po.OrderId == order.Id)
                         .ToList();
 
-                    // **Виправлення:** Перераховуємо суму замовлення після видалення товару
                     order.OdTotal = remainingProducts.Sum(po => (po.PoPrice ?? 0) );
 
                     // Якщо в замовленні більше немає товарів, видаляємо його
@@ -209,7 +208,7 @@ namespace ShopInfrastructure.Controllers
                     }
                 }
 
-                await _context.SaveChangesAsync(); // **Зберігаємо зміни замовлень перед оновленням чеків**
+                await _context.SaveChangesAsync();
 
                 // Оновлюємо чеки (Receipt), пов’язані із зміненими замовленнями
                 foreach (var receipt in affectedReceipts)
@@ -228,12 +227,11 @@ namespace ShopInfrastructure.Controllers
                                 .Where(po => po.OrderId == o.Id)
                                 .Sum(po => po.PoQuantity ?? 0));
 
-                        // **Виправлення:** RpTotal має сумувати оновлені OdTotal
                         receipt.RpTotal = relatedOrders.Sum(o => o.OdTotal ?? 0);
                     }
                 }
 
-                await _context.SaveChangesAsync(); // **Зберігаємо оновлені дані чеків**
+                await _context.SaveChangesAsync();
 
                 // Нарешті видаляємо сам продукт
                 _context.Products.Remove(product);
