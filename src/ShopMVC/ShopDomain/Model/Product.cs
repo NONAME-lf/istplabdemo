@@ -28,6 +28,7 @@ public partial class Product : Entity
     [Display (Name = "Опис")]
     public string? PdAbout { get; set; }
 
+    [Display(Name="Виробник")]
     public int? ManufacturerId { get; set; }
 
     public virtual Manufacturer? Manufacturer { get; set; }
