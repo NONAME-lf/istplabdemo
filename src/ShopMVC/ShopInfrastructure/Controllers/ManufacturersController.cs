@@ -141,32 +141,17 @@ namespace ShopInfrastructure.Controllers
             return View(manufacturer);
         }
 
+        // POST: Manufacturers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var manufacturer = await _context.Manufacturers
-                .Include(m => m.Products)
-                .ThenInclude(p => p.ProductCategories)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (manufacturer == null)
+            var manufacturer = await _context.Manufacturers.FindAsync(id);
+            if (manufacturer != null)
             {
-                return NotFound();
+                _context.Manufacturers.Remove(manufacturer);
             }
 
-            // Видаляємо всі категорії продуктів
-            foreach (var product in manufacturer.Products)
-            {
-                _context.ProductCategories.RemoveRange(product.ProductCategories);
-            }
-
-            // Видаляємо всі продукти виробника
-            _context.Products.RemoveRange(manufacturer.Products);
-
-            // Видаляємо виробника
-            _context.Manufacturers.Remove(manufacturer);
-    
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

@@ -74,14 +74,17 @@ namespace ShopInfrastructure.Controllers
         {
             if (quantity < 1) quantity = 1; // Мінімальна кількість = 1
 
-            var product = await _context.Products.FindAsync(productId);
+            var product = await _context.Products
+                .Include(p => p.Manufacturer) // Додаємо, якщо потрібно відображати виробника
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
             if (product == null) return NotFound();
 
             // Перевіряємо, чи достатньо товару на складі
             if (product.PdQuantity < quantity)
             {
-                TempData["Error"] = "Недостатня кількість товару на складі!";
-                return RedirectToAction("Index", "Carts");
+                ModelState.AddModelError("Quantity", "Недостатня кількість товару на складі!");
+                return View("~/Views/Products/Details.cshtml", product); // Явно вказуємо шлях до View
             }
 
             var cart = await _context.Carts
@@ -102,22 +105,21 @@ namespace ShopInfrastructure.Controllers
                 {
                     CartId = cart.Id,
                     ProductId = product.Id,
-                    PcQuantity = quantity,  
+                    PcQuantity = quantity,
                     PcPrice = product.PdPrice * quantity
                 };
                 _context.ProductCarts.Add(productCart);
             }
             else
             {
-                // **Перевіряємо, чи можна додати ще**
                 if (product.PdQuantity < productCart.PcQuantity + quantity)
                 {
-                    TempData["Error"] = "Недостатньо товару!";
-                    return RedirectToAction("Index", "Carts");
+                    ModelState.AddModelError("Quantity", "Недостатньо товару!");
+                    return View("~/Views/Products/Details.cshtml", product);
                 }
 
-                productCart.PcQuantity += quantity;  
-                productCart.PcPrice += product.PdPrice * quantity; 
+                productCart.PcQuantity += quantity;
+                productCart.PcPrice += product.PdPrice * quantity;
             }
 
             await _context.SaveChangesAsync();

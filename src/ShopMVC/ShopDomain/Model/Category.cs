@@ -8,7 +8,7 @@ public partial class Category : Entity
 {
     //public int CgId { get; set; }
     
-    [Required(ErrorMessage = "Поле не повино бути порожнім")]
+    [Required(ErrorMessage = "Поле не повинно бути порожнім")]
     [Display (Name = "Категорія")]
     public string? CgName { get; set; }
 

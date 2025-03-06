@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using ShopDomain.Model;
 
-namespace ShopDomain;
+namespace ShopInfrastructure;
 
 public partial class ShopDbContext : DbContext
 {
@@ -44,7 +44,7 @@ public partial class ShopDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=master;User Id=SA;Password=Rfybreks1;TrustServerCertificate=True;Encrypt=False;");
+        => optionsBuilder.UseSqlServer();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -113,6 +113,7 @@ public partial class ShopDbContext : DbContext
 
             entity.HasOne(d => d.Country).WithMany(p => p.Manufacturers)
                 .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_manufacturers_countries");
         });
 
@@ -203,12 +204,13 @@ public partial class ShopDbContext : DbContext
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductCarts)
                 .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_product_carts_products");
         });
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_product_catergories");
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("product_categories");
 
@@ -218,11 +220,13 @@ public partial class ShopDbContext : DbContext
 
             entity.HasOne(d => d.Category).WithMany(p => p.ProductCategories)
                 .HasForeignKey(d => d.CategoryId)
-                .HasConstraintName("FK_product_catergories_categories_1");
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_product_categories_categories_1");
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductCategories)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK_product_catergories_products");
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_product_categories_products");
         });
 
         modelBuilder.Entity<ProductOrder>(entity =>
@@ -245,6 +249,7 @@ public partial class ShopDbContext : DbContext
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductOrders)
                 .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_product_orders_products");
         });
 
@@ -265,7 +270,7 @@ public partial class ShopDbContext : DbContext
                 .HasMaxLength(10)
                 .HasColumnName("rp_discount");
             entity.Property(e => e.RpPayment)
-                .HasMaxLength(10)
+                .HasMaxLength(100)
                 .HasColumnName("rp_payment");
             entity.Property(e => e.RpQuantity).HasColumnName("rp_quantity");
             entity.Property(e => e.RpTotal)
@@ -275,6 +280,7 @@ public partial class ShopDbContext : DbContext
 
             entity.HasOne(d => d.Shipping).WithMany(p => p.Receipts)
                 .HasForeignKey(d => d.ShippingId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_receipts_shipings");
         });
 
@@ -293,10 +299,12 @@ public partial class ShopDbContext : DbContext
 
             entity.HasOne(d => d.Country).WithMany(p => p.Shipings)
                 .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_shipings_countries");
 
             entity.HasOne(d => d.ShippingCompany).WithMany(p => p.Shipings)
                 .HasForeignKey(d => d.ShippingCompanyId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_shipings_shipping_companies");
         });
 
@@ -310,7 +318,9 @@ public partial class ShopDbContext : DbContext
             entity.Property(e => e.ScAvgTimeNeed)
                 .HasMaxLength(100)
                 .HasColumnName("sc_avg_time_need");
-            entity.Property(e => e.ScName).HasColumnName("sc_name");
+            entity.Property(e => e.ScName)
+                .HasMaxLength(100)
+                .HasColumnName("sc_name");
             entity.Property(e => e.ScPricing)
                 .HasColumnType("decimal(18, 0)")
                 .HasColumnName("sc_pricing");
@@ -345,6 +355,7 @@ public partial class ShopDbContext : DbContext
 
             entity.HasOne(d => d.UrCountry).WithMany(p => p.Users)
                 .HasForeignKey(d => d.UrCountryId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_users_countries");
         });
 

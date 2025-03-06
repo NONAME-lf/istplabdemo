@@ -44,4 +44,8 @@
       <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap_minty.min.css" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\images\" />
+    </ItemGroup>
+
 </Project>
