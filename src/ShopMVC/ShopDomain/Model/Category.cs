@@ -6,17 +6,19 @@ namespace ShopDomain.Model;
 
 public partial class Category : Entity
 {
-    //public int CgId { get; set; }
-    
     [Required(ErrorMessage = "Поле не повинно бути порожнім")]
-    [Display (Name = "Категорія")]
+    [Display(Name = "Категорія")]
     public string? CgName { get; set; }
 
-    [Display (Name = "Під-категорія")]
-    public string? CgChildCategory { get; set; }
-
-    [Display (Name = "Опис")]
+    [Display(Name = "Опис")]
     public string? CgDescription { get; set; }
+
+    public string? CgChildCategory { get; set; }
+    
+    public int? ParentCategoryId { get; set; } // Додаємо зв'язок із батьківською категорією
+
+    public virtual Category? ParentCategory { get; set; }
+    public virtual ICollection<Category> SubCategories { get; set; } = new List<Category>();
 
     public virtual ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
 }

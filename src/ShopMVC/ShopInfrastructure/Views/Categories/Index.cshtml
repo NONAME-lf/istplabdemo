@@ -1,47 +1,64 @@
-@model IEnumerable<ShopDomain.Model.Category>
-
-@{
-    ViewData["Title"] = "Категорії";
-}
+@model Dictionary<ShopDomain.Model.Category, List<ShopDomain.Model.Category>>
 
 <h1>Категорії</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-success">Створити Нову</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.CgName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CgChildCategory)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CgDescription)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CgName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CgChildCategory)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CgDescription)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="accordion" id="categoryAccordion">
+    @foreach (var category in Model)
+    {
+        var collapseId = "collapse" + category.Key.Id; <!-- Унікальний ID для кожної категорії -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-@category.Key.Id">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false">
+                    <strong>@category.Key.CgName</strong>
+                </button>
+            </h2>
+            <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#categoryAccordion">
+                <div class="accordion-body">
+                    <p><strong>Опис:</strong> @category.Key.CgDescription</p>
+                    <div class="d-flex gap-2">
+                        <a asp-action="Edit" asp-route-id="@category.Key.Id" class="btn btn-primary btn-sm">Редагувати</a>
+                        <a asp-action="Delete" asp-route-id="@category.Key.Id" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити цю категорію?')">Видалити</a>
+                    </div>
+                    @if (category.Value.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Назва підкатегорії</th>
+                                    <th>Опис</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var subCategory in category.Value)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-action="Details" asp-route-id="@subCategory.Id" class="btn btn-primary">
+                                                @subCategory.CgName
+                                            </a>
+                                        </td>
+                                        <td>@subCategory.CgDescription</td>
+                                        <td>
+                                            <a asp-action="Edit" asp-route-id="@subCategory.Id" class="btn btn-primary btn-sm">Редагувати</a>
+                                            <a asp-action="Delete" asp-route-id="@subCategory.Id" class="btn btn-danger btn-sm">Видалити</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Підкатегорій немає.</p>
+                    }
+
+                    <!-- Кнопка для додавання підкатегорії -->
+                    <a asp-action="Create" asp-route-parentCategoryId="@category.Key.Id" class="btn btn-outline-primary btn-sm">
+                        + Додати підкатегорію
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

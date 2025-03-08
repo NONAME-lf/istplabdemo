@@ -23,7 +23,7 @@ public partial class Product : Entity
     public int? PdQuantity { get; set; }
     
     [Display (Name = "Знижка")]
-    public double? PdDiscount { get; set; }
+    public string? PdDiscount { get; set; }
 
     [Display (Name = "Опис")]
     public string? PdAbout { get; set; }

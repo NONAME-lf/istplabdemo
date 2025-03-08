@@ -23,6 +23,10 @@ public partial class Order : Entity
     public int? ProductId { get; set; }
 
     public int? ShippingId { get; set; }
+    
+    [Display(Name = "Дата створення")]
+    public DateTime? CreatedAt => Receipt?.RpDateCreated;
+    
     [Display (Name="")]
     public virtual User? OdUserNavigation { get; set; }
 

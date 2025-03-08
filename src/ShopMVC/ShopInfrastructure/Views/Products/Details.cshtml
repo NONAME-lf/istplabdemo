@@ -84,3 +84,49 @@
     <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-outline-warning">Edit</a> |
     <a asp-action="Index" class="btn btn-light">Back to List</a>
 </div>
+
+<div id="priceHistoryChart" style="width: 100%; height: 500px;"></div>
+
+@section Scripts
+{
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', { 'packages': ['corechart'] });
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            const productId = @Model.Id; // ID продукту із моделі
+
+            fetch(`/api/charts/productPriceHistory/${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const dataTable = new google.visualization.DataTable();
+                    dataTable.addColumn('date', 'Дата замовлення');  
+                    dataTable.addColumn('number', 'Ціна за одиницю'); 
+                    dataTable.addColumn({ type: 'string', role: 'tooltip' }); // Tooltip
+
+                    data.forEach(item => {
+                        const orderDate = new Date(item.orderDate);
+                        const tooltipText = `Дата: ${orderDate.toLocaleDateString()} \nЦіна: ${item.pricePerUnit} ₴\nКількість: ${item.quantitySold} шт`;
+
+                        dataTable.addRow([orderDate, item.pricePerUnit, tooltipText]);
+                    });
+
+                    const options = {
+                        title: 'Історія цін продукту',
+                        curveType: 'function',
+                        legend: { position: 'bottom' },
+                        hAxis: { title: 'Дата замовлення', format: 'dd.MM.yyyy' },
+                        vAxis: { title: 'Ціна за одиницю' },
+                        tooltip: { isHtml: false }, // Використовуємо текстовий tooltip
+                        width: 800,
+                        height: 500
+                    };
+
+                    const chart = new google.visualization.LineChart(document.getElementById('priceHistoryChart'));
+                    chart.draw(dataTable, options);
+                });
+        }
+
+    </script>
+}

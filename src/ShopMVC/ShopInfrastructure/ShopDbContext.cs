@@ -69,20 +69,27 @@ public partial class ShopDbContext : DbContext
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.Id);
-
             entity.ToTable("categories");
 
             entity.Property(e => e.Id).HasColumnName("cg_id");
+            entity.Property(e => e.CgName)
+                .HasMaxLength(100)
+                .HasColumnName("cg_name");
             entity.Property(e => e.CgChildCategory)
                 .HasMaxLength(100)
                 .HasColumnName("cg_child_category");
             entity.Property(e => e.CgDescription)
                 .HasMaxLength(1000)
                 .HasColumnName("cg_description");
-            entity.Property(e => e.CgName)
-                .HasMaxLength(100)
-                .HasColumnName("cg_name");
+    
+            entity.Property(e => e.ParentCategoryId).HasColumnName("parent_category_id");
+
+            entity.HasOne(e => e.ParentCategory)
+                .WithMany(e => e.SubCategories)
+                .HasForeignKey(e => e.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
+
 
         modelBuilder.Entity<Country>(entity =>
         {
@@ -124,7 +131,8 @@ public partial class ShopDbContext : DbContext
             entity.ToTable("orders");
 
             entity.Property(e => e.Id).HasColumnName("od_id");
-            entity.Property(e => e.OdDiscount).HasColumnName("od_discount");
+            entity.Property(e => e.OdDiscount).HasColumnName("od_discount")
+                .HasMaxLength(4);
             entity.Property(e => e.OdNotes)
                 .HasMaxLength(100)
                 .HasColumnName("od_notes");

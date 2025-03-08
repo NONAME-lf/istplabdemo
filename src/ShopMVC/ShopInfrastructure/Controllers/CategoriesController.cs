@@ -23,8 +23,24 @@ namespace ShopInfrastructure.Controllers
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            // Отримуємо всі категорії
+            var categories = await _context.Categories.ToListAsync();
+
+            // Формуємо словник, де ключ — головна категорія, а значення — список підкатегорій
+            var categoryDictionary = categories
+                .Where(c => string.IsNullOrEmpty(c.CgChildCategory)) // Отримуємо лише головні категорії
+                .ToDictionary(
+                    mainCategory => mainCategory, // Ключ — головна категорія
+                    mainCategory => categories    // Підкатегорії
+                        .Where(subCategory => subCategory.CgChildCategory == mainCategory.CgName)
+                        .ToList() // Значення — список підкатегорій
+                );
+
+            // Передаємо словник у вигляді моделі
+            return View(categoryDictionary);
         }
+
+
 
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -47,24 +63,45 @@ namespace ShopInfrastructure.Controllers
         // GET: Categories/Create
         public IActionResult Create()
         {
+            ViewBag.ParentCategories = _context.Categories
+                .Where(c => string.IsNullOrEmpty(c.CgChildCategory)) // Вибираємо тільки головні категорії
+                .ToList();
+    
             return View();
         }
+
 
         // POST: Categories/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CgName,CgChildCategory,CgDescription")] Category category)
+        public async Task<IActionResult> Create(Category category, int? parentCategoryId)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
+                if (parentCategoryId.HasValue)
+                {
+                    var parentCategory = await _context.Categories.FindAsync(parentCategoryId.Value);
+                    if (parentCategory != null)
+                    {
+                        category.CgChildCategory = parentCategory.CgName; // Призначаємо головну категорію
+                    }
+                }
+
+                _context.Categories.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            // Якщо валідація не пройшла, повертаємо список головних категорій
+            ViewBag.ParentCategories = _context.Categories
+                .Where(c => string.IsNullOrEmpty(c.CgChildCategory))
+                .ToList();
+
             return View(category);
         }
+
 
         // GET: Categories/Edit/5
         public async Task<IActionResult> Edit(int? id)
