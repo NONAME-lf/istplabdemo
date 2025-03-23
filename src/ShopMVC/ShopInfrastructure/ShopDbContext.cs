@@ -42,10 +42,6 @@ public partial class ShopDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer();
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cart>(entity =>
@@ -75,9 +71,9 @@ public partial class ShopDbContext : DbContext
             entity.Property(e => e.CgName)
                 .HasMaxLength(100)
                 .HasColumnName("cg_name");
-            entity.Property(e => e.CgChildCategory)
+            entity.Property(e => e.CgParentCategory)
                 .HasMaxLength(100)
-                .HasColumnName("cg_child_category");
+                .HasColumnName("cg_parent_category");
             entity.Property(e => e.CgDescription)
                 .HasMaxLength(1000)
                 .HasColumnName("cg_description");

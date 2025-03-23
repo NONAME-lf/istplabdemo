@@ -13,7 +13,7 @@ public partial class Category : Entity
     [Display(Name = "Опис")]
     public string? CgDescription { get; set; }
 
-    public string? CgChildCategory { get; set; }
+    public string? CgParentCategory { get; set; }
     
     public int? ParentCategoryId { get; set; } // Додаємо зв'язок із батьківською категорією
 

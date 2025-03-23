@@ -2,6 +2,11 @@
 
 <h1>Категорії</h1>
 
+<p>
+<a class="btn btn-primary mb-3" type="=submit" asp-area="" asp-controller="Categories" asp-action="Import">Завантажити з файлу</a>
+<a class="btn btn-primary mb-3" type="=submit" asp-area="" asp-controller="Categories" asp-action="Export">Експортувати у файл</a>
+</p>
+
 <div class="accordion" id="categoryAccordion">
     @foreach (var category in Model)
     {

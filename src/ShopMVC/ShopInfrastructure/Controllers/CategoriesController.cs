@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using ShopDomain;
 using ShopDomain.Model;
 using ShopInfrastructure;
+using ShopInfrastructure.Services;
+
 
 namespace ShopInfrastructure.Controllers
 {
@@ -15,11 +17,58 @@ namespace ShopInfrastructure.Controllers
     {
         private readonly ShopDbContext _context;
 
-        public CategoriesController(ShopDbContext context)
+        private readonly IDataPortServiceFactory<Category> _categoryDataPortServiceFactory;
+
+        
+        public CategoriesController(
+            ShopDbContext context,
+            IDataPortServiceFactory<Category> categoryDataPortServiceFactory)
         {
             _context = context;
+            _categoryDataPortServiceFactory = categoryDataPortServiceFactory;
         }
 
+
+        [HttpGet]
+        public IActionResult Import()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Import(IFormFile fileExcel, CancellationToken cancellationToken = default)
+        {
+            var importService = _categoryDataPortServiceFactory.GetImportService(fileExcel.ContentType);
+            
+            using var stream = fileExcel.OpenReadStream();
+            
+            await importService.ImportFromStreamAsync(stream, cancellationToken);
+            
+            return RedirectToAction(nameof(Index));
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> Export([FromQuery] string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+            CancellationToken cancellationToken = default)
+        {
+            var exportService = _categoryDataPortServiceFactory.GetExportService(contentType);
+
+            var memoryStream = new MemoryStream();
+
+            await exportService.WriteToAsync(memoryStream, cancellationToken);
+
+            await memoryStream.FlushAsync(cancellationToken);
+            memoryStream.Position = 0;
+
+
+            return new FileStreamResult(memoryStream, contentType)
+            {
+                FileDownloadName = $"categiries_{DateTime.UtcNow.ToShortDateString()}.xlsx"
+            };
+        }
+
+        
         // GET: Categories
         public async Task<IActionResult> Index()
         {
@@ -28,11 +77,11 @@ namespace ShopInfrastructure.Controllers
 
             // Формуємо словник, де ключ — головна категорія, а значення — список підкатегорій
             var categoryDictionary = categories
-                .Where(c => string.IsNullOrEmpty(c.CgChildCategory)) // Отримуємо лише головні категорії
+                .Where(c => string.IsNullOrEmpty(c.CgParentCategory)) // Отримуємо лише головні категорії
                 .ToDictionary(
                     mainCategory => mainCategory, // Ключ — головна категорія
                     mainCategory => categories    // Підкатегорії
-                        .Where(subCategory => subCategory.CgChildCategory == mainCategory.CgName)
+                        .Where(subCategory => subCategory.CgParentCategory == mainCategory.CgName)
                         .ToList() // Значення — список підкатегорій
                 );
 
@@ -64,7 +113,7 @@ namespace ShopInfrastructure.Controllers
         public IActionResult Create()
         {
             ViewBag.ParentCategories = _context.Categories
-                .Where(c => string.IsNullOrEmpty(c.CgChildCategory)) // Вибираємо тільки головні категорії
+                .Where(c => string.IsNullOrEmpty(c.CgParentCategory)) // Вибираємо тільки головні категорії
                 .ToList();
     
             return View();
@@ -85,7 +134,7 @@ namespace ShopInfrastructure.Controllers
                     var parentCategory = await _context.Categories.FindAsync(parentCategoryId.Value);
                     if (parentCategory != null)
                     {
-                        category.CgChildCategory = parentCategory.CgName; // Призначаємо головну категорію
+                        category.CgParentCategory = parentCategory.CgName; // Призначаємо головну категорію
                     }
                 }
 
@@ -96,7 +145,7 @@ namespace ShopInfrastructure.Controllers
 
             // Якщо валідація не пройшла, повертаємо список головних категорій
             ViewBag.ParentCategories = _context.Categories
-                .Where(c => string.IsNullOrEmpty(c.CgChildCategory))
+                .Where(c => string.IsNullOrEmpty(c.CgParentCategory))
                 .ToList();
 
             return View(category);
