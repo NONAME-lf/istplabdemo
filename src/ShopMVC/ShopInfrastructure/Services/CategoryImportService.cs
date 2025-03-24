@@ -39,7 +39,19 @@ public class CategoryImportService : IImportService<Category>
         var priceString = row.Cell(5).GetString().Replace("грн", "").Trim();
         var quantity = int.TryParse(row.Cell(6).GetString(), out var q) ? q : 0;
         var about = row.Cell(7).GetString().Trim();
-        var discount = row.Cell(8).GetString().Trim();
+        
+        string discount;
+        var rawDiscount = row.Cell(8).Value.ToString().Trim();
+        if (double.TryParse(rawDiscount, out var parsedDouble) && parsedDouble > 0 && parsedDouble < 1)
+        {
+            discount = (parsedDouble * 100).ToString("0") + "%";
+        }
+        else
+        {
+            discount = rawDiscount;
+        }
+
+        
         var manufacturerName = row.Cell(9).GetString().Trim();
 
         // Отримати або створити виробника
