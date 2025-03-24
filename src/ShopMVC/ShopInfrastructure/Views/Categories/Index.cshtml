@@ -15,8 +15,19 @@
     .category-image {
         height: 200px;
         width: 100%;
-        object-fit: fill;
+        object-fit: cover;
         transition: opacity 0.3s ease;
+    }
+
+    .category-card:hover .category-image {
+        opacity: 0.5;
+        filter: drop-shadow(0 0 60px #00ff7b);
+    }
+    
+    .category-card:hover .category-card
+    {
+        opacity: 1;
+        filter: drop-shadow(0 0 60px #000000);
     }
 
     .subcategory-list {
@@ -25,6 +36,7 @@
         transition: opacity 0.3s ease;
         position: absolute;
         top: 0;
+        left: 0;
         background-color: white;
         z-index: 10;
         width: 100%;
@@ -33,12 +45,7 @@
         overflow-y: auto;
     }
 
-    .category-card:hover .category-image {
-        opacity: 0.5;
-        filter: drop-shadow(0 0 60px #00ff7b);
-    }
-
-    .category-image:checked .subcategory-list {
+    .subcategory-list.show {
         display: block;
         opacity: 1;
     }
@@ -49,18 +56,24 @@
 <div class="row row-cols-1 row-cols-md-3 g-4">
     @foreach (var category in Model)
     {
+        var cardId = $"card-{category.Key.Id}";
+        var subListId = $"sub-{category.Key.Id}";
         <div class="col">
-            <div class="card category-card h-100 shadow-sm">
+            <div class="card category-card h-100 shadow-sm"
+                 id="@cardId"
+                 onmouseleave="hideSubcategory('@subListId')">
+
                 <img src="~/images/categories/@category.Key.CgImage"
                      alt="@category.Key.CgName"
-                     class="category-image" />
+                     class="category-image"
+                     onclick="toggleSubcategory('@subListId')" />
 
                 <div class="card-body">
                     <h5 class="card-title">@category.Key.CgName</h5>
                     <p class="card-text text-muted">@category.Key.CgDescription</p>
                 </div>
 
-                <div class="subcategory-list">
+                <div class="subcategory-list" id="@subListId">
                     <h6 class="mb-3">Підкатегорії:</h6>
                     <ul class="list-group list-group-flush">
                         @foreach (var subCategory in category.Value)
@@ -81,3 +94,27 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        function toggleSubcategory(id) {
+            // Закрити всі відкриті списки
+            document.querySelectorAll('.subcategory-list.show').forEach(el => {
+                el.classList.remove('show');
+            });
+
+            // Відкрити вибраний
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('show');
+            }
+        }
+
+        function hideSubcategory(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('show');
+            }
+        }
+    </script>
+}
