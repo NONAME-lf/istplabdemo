@@ -17,6 +17,8 @@ public partial class Category : Entity
     
     public int? ParentCategoryId { get; set; } // Додаємо зв'язок із батьківською категорією
 
+    public string? CgImage { get; set; }
+    
     public virtual Category? ParentCategory { get; set; }
     public virtual ICollection<Category> SubCategories { get; set; } = new List<Category>();
 

@@ -77,6 +77,9 @@ public partial class ShopDbContext : DbContext
             entity.Property(e => e.CgDescription)
                 .HasMaxLength(1000)
                 .HasColumnName("cg_description");
+            entity.Property(e => e.CgImage)
+                .HasMaxLength(1000)
+                .HasColumnName("cg_image");
     
             entity.Property(e => e.ParentCategoryId).HasColumnName("parent_category_id");
 
