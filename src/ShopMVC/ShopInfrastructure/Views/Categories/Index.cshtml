@@ -23,12 +23,6 @@
         opacity: 0.5;
         filter: drop-shadow(0 0 60px #00ff7b);
     }
-    
-    .category-card:hover .category-card
-    {
-        opacity: 1;
-        filter: drop-shadow(0 0 60px #000000);
-    }
 
     .subcategory-list {
         display: none;
@@ -48,6 +42,60 @@
     .subcategory-list.show {
         display: block;
         opacity: 1;
+    }
+
+    /* FAB Styles */
+    .fab-container {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+    }
+
+    .fab-main {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        font-size: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .fab-main:hover {
+        transform: rotate(90deg);
+    }
+
+    .fab-options {
+        display: none;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-bottom: 10px;
+    }
+
+    .fab-option {
+        background-color: white;
+        color: black;
+        padding: 8px 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        text-decoration: none;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transition: background-color 0.2s;
+    }
+
+    .fab-option:hover {
+        background-color: #f1f1f1;
+    }
+
+    .fab-options.show {
+        display: flex;
     }
 </style>
 
@@ -95,6 +143,16 @@
     }
 </div>
 
+<!-- FAB -->
+<div class="fab-container">
+    <div class="fab-options" id="fabOptions">
+        <a asp-action="Create" class="fab-option">➕ Додати категорію</a>
+        <a asp-action="Import" class="fab-option">📥 Імпорт з Excel</a>
+        <a asp-action="Export" class="fab-option">📤 Експорт у Excel</a>
+    </div>
+    <button class="fab-main" onclick="toggleFab()">+</button>
+</div>
+
 @section Scripts {
     <script>
         function toggleSubcategory(id) {
@@ -116,5 +174,18 @@
                 el.classList.remove('show');
             }
         }
+
+        function toggleFab() {
+            const fab = document.getElementById("fabOptions");
+            fab.classList.toggle("show");
+        }
+
+        document.addEventListener('click', function (e) {
+            const fab = document.getElementById("fabOptions");
+            const btn = document.querySelector('.fab-main');
+            if (!fab.contains(e.target) && !btn.contains(e.target)) {
+                fab.classList.remove('show');
+            }
+        });
     </script>
 }
