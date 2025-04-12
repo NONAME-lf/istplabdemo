@@ -130,28 +130,40 @@
                                 @subCategory.CgName
                                 <a asp-action="Details" asp-route-id="@subCategory.Id" class="btn btn-sm btn-outline-primary">До товарів</a>
                             </li>
+                            @if (User.IsInRole("admin"))
+                            {
+                                <div class="card-footer d-flex justify-content-between">
+                                    <a asp-action="Edit" asp-route-id="@category.Key.Id" class="btn btn-sm btn-primary">Редагувати</a>
+                                    <a asp-action="Delete" asp-route-id="@category.Key.Id" class="btn btn-sm btn-danger" onclick="return confirm('Ви впевнені, що хочете видалити цю категорію?')">Видалити</a>
+                                </div>
+                            }
                         }
                     </ul>
                 </div>
-
-                <div class="card-footer d-flex justify-content-between">
-                    <a asp-action="Edit" asp-route-id="@category.Key.Id" class="btn btn-sm btn-primary">Редагувати</a>
-                    <a asp-action="Delete" asp-route-id="@category.Key.Id" class="btn btn-sm btn-danger" onclick="return confirm('Ви впевнені, що хочете видалити цю категорію?')">Видалити</a>
-                </div>
+                @if (User.IsInRole("admin"))
+                {
+                    <div class="card-footer d-flex justify-content-between">
+                        <a asp-action="Edit" asp-route-id="@category.Key.Id" class="btn btn-sm btn-primary">Редагувати</a>
+                        <a asp-action="Delete" asp-route-id="@category.Key.Id" class="btn btn-sm btn-danger" onclick="return confirm('Ви впевнені, що хочете видалити цю категорію?')">Видалити</a>
+                    </div>
+                }
             </div>
         </div>
     }
 </div>
 
-<!-- FAB -->
-<div class="fab-container">
-    <div class="fab-options" id="fabOptions">
-        <a asp-action="Create" class="fab-option">➕ Додати категорію</a>
-        <a asp-action="Import" class="fab-option">📥 Імпорт з Excel</a>
-        <a asp-action="Export" class="fab-option">📤 Експорт у Excel</a>
+@if (User.IsInRole("admin"))
+{
+    <!-- FAB -->
+    <div class="fab-container">
+        <div class="fab-options" id="fabOptions">
+            <a asp-action="Create" class="fab-option">➕ Додати категорію</a>
+            <a asp-action="Import" class="fab-option">📥 Імпорт з Excel</a>
+            <a asp-action="Export" class="fab-option">📤 Експорт у Excel</a>
+        </div>
+        <button class="fab-main" onclick="toggleFab()">+</button>
     </div>
-    <button class="fab-main" onclick="toggleFab()">+</button>
-</div>
+}
 
 @section Scripts {
     <script>

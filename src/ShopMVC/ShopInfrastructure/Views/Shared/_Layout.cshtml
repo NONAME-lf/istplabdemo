@@ -29,7 +29,24 @@
                     </li>
                 </ul>
             </div>
-            <a asp-controller="Carts" asp-action="Index" class="btn btn-primary">Кошик</a>
+            <a asp-controller="Carts" asp-action="Index" class="btn btn-primary mx-2">Кошик</a>
+            @if(User.Identity.IsAuthenticated)
+            {
+                <p class="text-white mb-0">Привіт, @User.Identity.Name.Split('@')[0]</p>
+
+
+                <form method="post" asp-controller="Account" asp-action="Logout" class="d-inline">
+                    <input type="submit" value="Вихід" class="btn btn-outline-light btn-sm mx-2" />
+                </form>
+            }
+            else
+            {
+                <div class="d-flex gap-2">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light">Вхід</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-success">Реєстрація</a>
+                </div>
+            }
+
         </div>
     </nav>
 </header>
@@ -43,7 +60,7 @@
     <div class="container">
         &copy; 2025 - Shop - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> -
         <a asp-controller="Home" asp-action="Index">Main</a> -
-         About - Us - Contacts - Brands - Vacancies
+        About - Us - Contacts - Brands - Vacancies
     </div>
 </footer>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>

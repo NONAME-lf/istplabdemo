@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ShopDomain.Model;
 
 namespace ShopInfrastructure;
 
-public partial class ShopDbContext : DbContext
+public partial class ShopDbContext : IdentityDbContext<User>
 {
     public ShopDbContext()
     {
@@ -40,10 +41,11 @@ public partial class ShopDbContext : DbContext
 
     public virtual DbSet<ShippingCompany> ShippingCompanies { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+    //public virtual DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Cart>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -185,7 +187,9 @@ public partial class ShopDbContext : DbContext
                 .HasColumnType("money")
                 .HasColumnName("pd_price");
             entity.Property(e => e.PdQuantity).HasColumnName("pd_quantity");
-
+            entity.Property(e => e.PdImagePath).HasColumnName("pd_image_path")
+                .HasMaxLength(450);
+                
             entity.HasOne(d => d.Manufacturer).WithMany(p => p.Products)
                 .HasForeignKey(d => d.ManufacturerId)
                 .HasConstraintName("FK_products_manufacturers");
@@ -335,35 +339,35 @@ public partial class ShopDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_users");
-
-            entity.ToTable("// users");
-
-            entity.Property(e => e.Id).HasColumnName("ur_id");
-            entity.Property(e => e.UrBirthdate)
-                .HasColumnType("datetime")
-                .HasColumnName("ur_birthdate");
-            entity.Property(e => e.UrCountryId).HasColumnName("ur_country_id");
-            entity.Property(e => e.UrEmail)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasColumnName("ur_email");
-            entity.Property(e => e.UrNickname)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasColumnName("ur_nickname");
-            entity.Property(e => e.UrRole)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasColumnName("ur_role");
-
-            entity.HasOne(d => d.UrCountry).WithMany(p => p.Users)
-                .HasForeignKey(d => d.UrCountryId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_users_countries");
+            // entity.HasKey(e => e.Id).HasName("PK_users");
+            //
+            // entity.ToTable("// users");
+            //
+            // entity.Property(e => e.Id).HasColumnName("ur_id");
+            // entity.Property(e => e.UrBirthdate)
+            //     .HasColumnType("datetime")
+            //     .HasColumnName("ur_birthdate");
+            // entity.Property(e => e.UrCountryId).HasColumnName("ur_country_id");
+            // entity.Property(e => e.UrEmail)
+            //     .HasMaxLength(10)
+            //     .IsUnicode(false)
+            //     .IsFixedLength()
+            //     .HasColumnName("ur_email");
+            // entity.Property(e => e.UrNickname)
+            //     .HasMaxLength(10)
+            //     .IsUnicode(false)
+            //     .IsFixedLength()
+            //     .HasColumnName("ur_nickname");
+            // entity.Property(e => e.UrRole)
+            //     .HasMaxLength(10)
+            //     .IsUnicode(false)
+            //     .IsFixedLength()
+            //     .HasColumnName("ur_role");
+            //
+            // entity.HasOne(d => d.UrCountry).WithMany(p => p.Users)
+            //     .HasForeignKey(d => d.UrCountryId)
+            //     .OnDelete(DeleteBehavior.Cascade)
+            //     .HasConstraintName("FK_users_countries");
         });
 
         OnModelCreatingPartial(modelBuilder);

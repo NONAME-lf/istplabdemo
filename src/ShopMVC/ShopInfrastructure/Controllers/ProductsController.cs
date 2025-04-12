@@ -51,7 +51,15 @@ namespace ShopInfrastructure.Controllers
             {
                 return NotFound();
             }
+            
+            //
+            var category = product.ProductCategories
+                .Select(pc => pc.Category)
+                .FirstOrDefault();
 
+            ViewBag.CategoryId = category?.Id;
+            ViewBag.CategoryName = category?.CgName;
+            
             return View(product);
         }
 

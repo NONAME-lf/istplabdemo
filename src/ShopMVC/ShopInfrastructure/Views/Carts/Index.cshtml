@@ -8,6 +8,13 @@
 
 <h1>Продукти у кошику @ViewBag.CartId</h1>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрити"></button>
+    </div>
+}
 
 
 <table class="table">
@@ -16,6 +23,7 @@
             <th>Назва продукту</th>
             <th>Кількість</th>
             <th>Ціна</th>
+            <th>Знижка</th>
             <th></th>
         </tr>
     </thead>
@@ -26,9 +34,10 @@
                 <td>@item.Product.PdName</td>
                 <td>@item.PcQuantity</td>
                 <td>@item.PcPrice</td>
+                <td>@item.Product.PdDiscount</td>
                 <td>
                     <form asp-action="RemoveProduct" asp-controller="Carts" method="post">
-                        <input type="hidden" name="productId" value="@item.Id" />
+                        <input type="hidden" name="productId" value="@item.ProductId" />
                         <button type="submit" class="btn btn-outline-danger">Видалити</button>
                     </form>
                 </td>

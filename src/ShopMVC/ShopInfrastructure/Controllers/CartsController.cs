@@ -7,57 +7,62 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ShopDomain;
 using ShopDomain.Model;
+using Microsoft.AspNetCore.Identity;
 
 namespace ShopInfrastructure.Controllers
 {
     public class CartsController : Controller
     {
         private readonly ShopDbContext _context;
-
-        public CartsController(ShopDbContext context)
+        private readonly UserManager<User> _userManager;
+        
+        public CartsController(ShopDbContext context,  UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         
-        // public async Task<Cart> GetOrCreateCart()
-        // {
-        //     var cartId = HttpContext.Session.GetInt32("CartId");
-        //
-        //     if (cartId == null)
-        //     {
-        //         var newCart = new Cart();
-        //         _context.Carts.Add(newCart);
-        //         await _context.SaveChangesAsync();
-        //
-        //         HttpContext.Session.SetInt32("CartId", newCart.Id);
-        //         return newCart;
-        //     }
-        //
-        //     var cart = await _context.Carts
-        //         .Include(c => c.ProductCarts)
-        //         .ThenInclude(pc => pc.Product)
-        //         .FirstOrDefaultAsync(c => c.Id == cartId);
-        //
-        //     return cart ?? throw new Exception("Кошик не знайдено.");
-        // }
+        private async Task<Cart> GetOrCreateCartForCurrentUserAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not authenticated.");
+            }
+
+            var cart = await _context.Carts
+                .Include(c => c.ProductCarts)
+                .ThenInclude(pc => pc.Product)
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+            if (cart == null)
+            {
+                cart = new Cart { UserId = user.Id };
+                _context.Carts.Add(cart);
+                await _context.SaveChangesAsync();
+            }
+
+            return cart;
+        }
         
         [HttpPost]
         public async Task<IActionResult> RemoveProduct(int productId)
         {
-            var cartId = HttpContext.Session.GetInt32("CartId");
-
-            if (cartId == null)
+            //var cartId = HttpContext.Session.GetInt32("CartId");
+            var cart = await GetOrCreateCartForCurrentUserAsync();
+            
+            if (cart == null)
             {
                 return RedirectToAction(nameof(Index));
             }
            
             var productCart = await _context.ProductCarts
-                .FirstOrDefaultAsync(pc => pc.CartId == cartId && pc.Id == productId);
+                .FirstOrDefaultAsync(pc => pc.CartId == cart.Id && pc.ProductId == productId);
 
             if (productCart == null)
             {
-                Console.WriteLine($"Product with ID {productId} not found in cart {cartId}");
+                Console.WriteLine($"Product with ID {productId} not found in cart {cart}");
             }
             else
             {
@@ -86,17 +91,25 @@ namespace ShopInfrastructure.Controllers
                 ModelState.AddModelError("Quantity", "Недостатня кількість товару на складі!");
                 return View("~/Views/Products/Details.cshtml", product); // Явно вказуємо шлях до View
             }
-
+            
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not authenticated.");
+            }
+            
             var cart = await _context.Carts
                 .Include(c => c.ProductCarts)
-                .FirstOrDefaultAsync();
-
+                .ThenInclude(pc => pc.Product)
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
+            
             if (cart == null)
             {
-                cart = new Cart();
+                cart = new Cart { UserId = user.Id };
                 _context.Carts.Add(cart);
                 await _context.SaveChangesAsync();
             }
+
 
             var productCart = cart.ProductCarts.FirstOrDefault(pc => pc.ProductId == productId);
             if (productCart == null)
@@ -131,20 +144,18 @@ namespace ShopInfrastructure.Controllers
         // GET: Carts
         public async Task<IActionResult> Index()
         {
-            var cart = await _context.Carts
-                .Include(c => c.ProductCarts)
-                .ThenInclude(pc => pc.Product)
-                .FirstOrDefaultAsync(); // Поки без користувачів, просто беремо перший кошик
-
-            if (cart == null)
-            {
-                cart = new Cart();
-                _context.Carts.Add(cart);
-                await _context.SaveChangesAsync();
-                HttpContext.Session.SetInt32("CartId", cart.Id);
-            }
-
-            HttpContext.Session.SetInt32("CartId", cart.Id);
+            var cart = await GetOrCreateCartForCurrentUserAsync();
+            //     _context.Carts
+            //     .Include(c => c.ProductCarts)
+            //     .ThenInclude(pc => pc.Product)
+            //     .FirstOrDefaultAsync(); // Поки без користувачів, просто беремо перший кошик
+            //
+            // if (cart == null)
+            // {
+            //     cart = new Cart();
+            //     _context.Carts.Add(cart);
+            //     await _context.SaveChangesAsync();
+            // }
 
             // Передаємо компанії доставки у ViewBag
             ViewBag.ShippingCompanies = await _context.ShippingCompanies.ToListAsync();

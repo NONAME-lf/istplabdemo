@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShopDomain.Model;
 
@@ -8,7 +9,7 @@ public partial class Order : Entity
 {
     //public int OdId { get; set; }
 
-    public int? OdUser { get; set; }
+    public string? OdUser { get; set; }
     [Display (Name="Всього")]
     public decimal? OdTotal { get; set; }
     [Display (Name = "Знижка")]
@@ -27,7 +28,8 @@ public partial class Order : Entity
     [Display(Name = "Дата створення")]
     public DateTime? CreatedAt => Receipt?.RpDateCreated;
     
-    [Display (Name="")]
+    [Display (Name="Id користувача")]
+    //[ForeignKey("OdUser")]
     public virtual User? OdUserNavigation { get; set; }
 
     public virtual ICollection<ProductOrder> ProductOrders { get; set; } = new List<ProductOrder>();

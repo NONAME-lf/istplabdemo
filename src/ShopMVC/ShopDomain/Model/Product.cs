@@ -28,6 +28,8 @@ public partial class Product : Entity
     [Display (Name = "Опис")]
     public string? PdAbout { get; set; }
 
+    public string? PdImagePath { get; set; }
+
     [Display(Name="Виробник")]
     public int? ManufacturerId { get; set; }
     [Display(Name="Виробник")]

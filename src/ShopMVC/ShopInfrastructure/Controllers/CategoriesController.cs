@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using ShopInfrastructure.Services;
 
 namespace ShopInfrastructure.Controllers
 {
+    
     public class CategoriesController : Controller
     {
         private readonly ShopDbContext _context;
@@ -37,6 +39,7 @@ namespace ShopInfrastructure.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Import(IFormFile fileExcel, CancellationToken cancellationToken = default)
         {
             var importService = _categoryDataPortServiceFactory.GetImportService(fileExcel.ContentType);
@@ -47,8 +50,8 @@ namespace ShopInfrastructure.Controllers
             
             return RedirectToAction(nameof(Index));
         }
-        
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Export([FromQuery] string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
             CancellationToken cancellationToken = default)
         {
@@ -108,7 +111,8 @@ namespace ShopInfrastructure.Controllers
 
             return RedirectToAction("Index", "Products", new { id = category.Id, name = category.CgName });
         }
-
+        
+        [Authorize(Roles = "admin")]
         // GET: Categories/Create
         public IActionResult Create()
         {
@@ -119,7 +123,7 @@ namespace ShopInfrastructure.Controllers
             return View();
         }
 
-
+        [Authorize(Roles = "admin")]
         // POST: Categories/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -151,7 +155,7 @@ namespace ShopInfrastructure.Controllers
             return View(category);
         }
 
-
+        [Authorize(Roles = "admin")]
         // GET: Categories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -167,13 +171,14 @@ namespace ShopInfrastructure.Controllers
             }
             return View(category);
         }
-
+        
+        [Authorize(Roles = "admin")]
         // POST: Categories/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CgName,CgChildCategory,CgDescription")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CgName,CgParentCategory, CgImage, CgDescription")] Category category)
         {
             if (id != category.Id)
             {
@@ -204,6 +209,7 @@ namespace ShopInfrastructure.Controllers
         }
 
         // GET: Categories/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -224,6 +230,7 @@ namespace ShopInfrastructure.Controllers
         // POST: Categories/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var category = await _context.Categories.FindAsync(id);

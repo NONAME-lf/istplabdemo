@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,26 +14,30 @@ namespace ShopInfrastructure.Controllers
     public class OrdersController : Controller
     {
         private readonly ShopDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public OrdersController(ShopDbContext context)
+        public OrdersController(ShopDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         [HttpPost]
         public async Task<IActionResult> Checkout(string paymentMethod, string? cardNumber, string? orderNotes,
             string shippingMethod, string? address, int? shippingCompanyId)
-        {
-            var cartId = HttpContext.Session.GetInt32("CartId");
-            if (cartId == null) return RedirectToAction("Index", "Carts");
+        { 
+            //var cartId = HttpContext.Session.GetInt32("CartId");
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Index", "Carts");
 
             var cart = await _context.Carts
                 .Include(c => c.ProductCarts)
                 .ThenInclude(pc => pc.Product)
-                .FirstOrDefaultAsync(c => c.Id == cartId);
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
 
             if (cart == null || !cart.ProductCarts.Any())
             {
+                TempData["Error"] = "Ваш кошик порожній! Додайте товари перед оформленням замовлення.";
                 return RedirectToAction("Index", "Carts");
             }
 
@@ -56,20 +61,44 @@ namespace ShopInfrastructure.Controllers
             };
             _context.Shipings.Add(shipping);
             await _context.SaveChangesAsync();
+            
+            
+            decimal orderTotal = 0;
 
+            var productOrders = new List<ProductOrder>();
+            foreach (var pc in cart.ProductCarts)
+            {
+                var price = pc.Product.PdPrice ?? 0;
+                var discount = 0m;
+
+                // Обробка PdDiscount, якщо це "%", наприклад "10%"
+                if (!string.IsNullOrEmpty(pc.Product.PdDiscount) &&
+                    pc.Product.PdDiscount.EndsWith("%") &&
+                    decimal.TryParse(pc.Product.PdDiscount.TrimEnd('%'), out var discountPercent))
+                {
+                    discount = price * (discountPercent / 100m);
+                }
+
+                var finalPrice = (price - discount) * (pc.PcQuantity ?? 1);
+                orderTotal += finalPrice;
+
+                productOrders.Add(new ProductOrder
+                {
+                    ProductId = pc.ProductId,
+                    PoPrice = price - discount,
+                    PoQuantity = pc.PcQuantity
+                });
+            }
+            
+            
             var order = new Order
             {
-                OdUser = null,
-                OdTotal = cart.ProductCarts.Sum(pc => pc.PcPrice),
+                OdUser = user.Id,
+                OdTotal = orderTotal,
                 OdPayment = paymentMethod == "card" ? cardNumber : "cash",
                 OdNotes = orderNotes,
                 ShippingId = shipping.Id,
-                ProductOrders = cart.ProductCarts.Select(pc => new ProductOrder
-                {
-                    ProductId = pc.ProductId,
-                    PoPrice = pc.PcPrice,
-                    PoQuantity = pc.PcQuantity
-                }).ToList()
+                ProductOrders = productOrders,
             };
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
@@ -142,11 +171,31 @@ namespace ShopInfrastructure.Controllers
         
         
         // GET: Orders
+        // GET: Orders
         public async Task<IActionResult> Index()
         {
-            var shopDbContext = _context.Orders.Include(o => o.OdUserNavigation).Include(o => o.Product).Include(o => o.Receipt).Include(o => o.Shipping);
-            return View(await shopDbContext.ToListAsync());
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account"); // або як у тебе називається
+            }
+
+            var orders = await _context.Orders
+                .Where(o => o.OdUser == user.Id)
+                .Include(o => o.Product)
+                .Include(o => o.Receipt)
+                .Include(o => o.Shipping)
+                .ToListAsync();
+
+            // Оскільки всі замовлення вже належать одному користувачу, можна одразу прикріпити
+            foreach (var order in orders)
+            {
+                order.OdUserNavigation = user;
+            }
+
+            return View(orders);
         }
+
 
         // GET: Orders/Details/5
         public async Task<IActionResult> Details(int? id)
