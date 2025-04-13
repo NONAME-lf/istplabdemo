@@ -28,7 +28,7 @@ namespace ShopMVC.Controllers
                 .Select(po => new
                 {
                     OrderDate = (po.Order!.Receipt!.RpDateCreated ?? po.Order.CreatedAt ?? DateTime.UtcNow).Date,
-                    PricePerUnit = (po.PoPrice / (decimal?)po.PoQuantity) * (1 - ParseDiscount(po.Product.PdDiscount ?? "0%")),
+                    PricePerUnit = (po.PoPrice/* / (decimal?)po.PoQuantity*/) * (1 - ParseDiscount(po.Product.PdDiscount ?? "0%")),
                     Quantity = po.PoQuantity
                 })
                 .ToListAsync(cancellationToken);

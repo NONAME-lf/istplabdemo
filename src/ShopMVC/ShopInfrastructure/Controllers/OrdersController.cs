@@ -177,24 +177,41 @@ namespace ShopInfrastructure.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account"); // або як у тебе називається
+                return RedirectToAction("Login", "Account"); // або інша твоя сторінка логіну
             }
 
-            var orders = await _context.Orders
-                .Where(o => o.OdUser == user.Id)
-                .Include(o => o.Product)
-                .Include(o => o.Receipt)
-                .Include(o => o.Shipping)
-                .ToListAsync();
+            List<Order> orders;
 
-            // Оскільки всі замовлення вже належать одному користувачу, можна одразу прикріпити
-            foreach (var order in orders)
+            if (User.IsInRole("admin"))
             {
-                order.OdUserNavigation = user;
+                // Адмін бачить усі замовлення
+                orders = await _context.Orders
+                    .Include(o => o.Product)
+                    .Include(o => o.Receipt)
+                    .Include(o => o.Shipping)
+                    .Include(o => o.OdUserNavigation)
+                    .ToListAsync();
+            }
+            else
+            {
+                // Звичайний користувач — лише свої
+                orders = await _context.Orders
+                    .Where(o => o.OdUser == user.Id)
+                    .Include(o => o.Product)
+                    .Include(o => o.Receipt)
+                    .Include(o => o.Shipping)
+                    .ToListAsync();
+
+                // Додати навігацію на користувача, якщо треба
+                foreach (var order in orders)
+                {
+                    order.OdUserNavigation = user;
+                }
             }
 
             return View(orders);
         }
+
 
 
         // GET: Orders/Details/5
