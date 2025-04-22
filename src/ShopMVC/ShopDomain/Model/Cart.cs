@@ -13,6 +13,8 @@ public partial class Cart : Entity
 
     public string? UserId { get; set; }
 
+    public string? SessionId { get; set; }
+    
     public virtual ICollection<ProductCart> ProductCarts { get; set; } = new List<ProductCart>();
 
     public virtual User? User { get; set; }

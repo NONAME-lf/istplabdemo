@@ -79,7 +79,7 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            User user = new User { Email = model.Email, UserName = model.Email, UrBirthdate = model.Birthdate };
+            User user = new User { Email = model.Email, PhoneNumber = model.PhoneNumber, UserName = model.Email, UrBirthdate = model.Birthdate };
             // додаємо користувача
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)

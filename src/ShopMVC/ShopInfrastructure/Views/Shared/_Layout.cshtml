@@ -29,7 +29,19 @@
                     </li>
                 </ul>
             </div>
-            <a asp-controller="Carts" asp-action="Index" class="btn btn-primary mx-2">Кошик</a>
+            <form class="d-flex me-2" asp-controller="Products" asp-action="Search" method="get">
+                <input class="form-control me-2" type="search" name="query" placeholder="Пошук товарів" aria-label="Search">
+                <button class="btn btn-outline-light" type="submit">Пошук</button>
+            </form>
+
+            @if (User.IsInRole("user"))
+            {
+                <a asp-controller = "Carts" asp-action = "Index" class ="btn btn-outline-light mx-2" > Кошик </a>
+            }
+            @if (User.IsInRole("admin"))
+            {
+                <a asp-controller = "Orders" asp-action = "Index" class ="btn btn-outline-light mx-2" > Замовлення </a>
+            }
             @if(User.Identity.IsAuthenticated)
             {
                 <p class="text-white mb-0">Привіт, @User.Identity.Name.Split('@')[0]</p>

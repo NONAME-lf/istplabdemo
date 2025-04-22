@@ -15,6 +15,23 @@ namespace ShopInfrastructure.Controllers
             _context = context;
         }
         
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return RedirectToAction("Index");
+
+            var results = await _context.Products
+                .Include(p => p.ProductCategories)
+                .ThenInclude(pc => pc.Category)
+                .Where(p => p.PdName.Contains(query) || p.PdAbout.Contains(query))
+                .ToListAsync();
+
+            ViewBag.Query = query;
+            return View(results);
+        }
+
+
+        
         // GET: Products
         // GET: Products
         public async Task<IActionResult> Index(int? id, string? name)

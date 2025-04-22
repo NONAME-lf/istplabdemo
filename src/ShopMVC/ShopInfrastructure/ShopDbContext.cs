@@ -57,7 +57,10 @@ public partial class ShopDbContext : IdentityDbContext<User>
             entity.Property(e => e.Id).HasColumnName("ct_id");
             entity.Property(e => e.CtPrice).HasColumnName("ct_price");
             entity.Property(e => e.CtQuantity).HasColumnName("ct_quantity");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id")
+                .HasMaxLength(450);
+            entity.Property(e => e.SessionId).HasColumnName("session_id")
+                .HasMaxLength(450);
 
             entity.HasOne(d => d.User).WithOne(p => p.Cart)
                 .HasForeignKey<Cart>(d => d.UserId)

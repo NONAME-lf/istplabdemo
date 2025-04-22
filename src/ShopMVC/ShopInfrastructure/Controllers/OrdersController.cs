@@ -28,7 +28,7 @@ namespace ShopInfrastructure.Controllers
         { 
             //var cartId = HttpContext.Session.GetInt32("CartId");
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Index", "Carts");
+            if (user == null) return RedirectToAction("Login", "Account"); // або інша твоя сторінка логіну
 
             var cart = await _context.Carts
                 .Include(c => c.ProductCarts)
@@ -177,7 +177,7 @@ namespace ShopInfrastructure.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account"); // або інша твоя сторінка логіну
+                return RedirectToAction("Login", "Account"); 
             }
 
             List<Order> orders;

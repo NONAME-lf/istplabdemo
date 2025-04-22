@@ -11,6 +11,11 @@ public class RegisterViewModel
     public string Email { get; set; }
     
     [Required]
+    [Display(Name="Phone number")]
+    [DataType(DataType.PhoneNumber)]
+    public string PhoneNumber { get; set; }
+    
+    [Required]
     [Display(Name="Дата народження")]
     public DateTime Birthdate { get; set; }
     

@@ -28,7 +28,7 @@ public partial class Order : Entity
     [Display(Name = "Дата створення")]
     public DateTime? CreatedAt => Receipt?.RpDateCreated;
     
-    [Display (Name="Id користувача")]
+    [Display (Name="Номер телефону користувача")]
     //[ForeignKey("OdUser")]
     public virtual User? OdUserNavigation { get; set; }
 

@@ -17,6 +17,14 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ShopDbContext>();
 
+//
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromDays(7); // сесія активна 7 днів
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddScoped<IDataPortServiceFactory<Category>, CategoryDataPortServiceFactory>();//
 var app = builder.Build();
 
@@ -49,6 +57,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseAuthentication(); //підключення автентифікації
+app.UseSession();
 
 app.UseRouting();
 
