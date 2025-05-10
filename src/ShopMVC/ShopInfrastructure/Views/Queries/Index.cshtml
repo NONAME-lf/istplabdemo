@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Queries Menu";
+}
+
+<h2>Queries Menu</h2>
+
+<div class="list-group">
+    <a asp-action="UnorderedProductsByQuantity" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">Unordered Products by Quantity</h5>
+        <p class="mb-1">Find products that haven't been ordered yet and have quantity less than specified</p>
+    </a>
+
+    <a asp-action="ManufacturersByUserOrders" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">Manufacturers by User Orders</h5>
+        <p class="mb-1">Find manufacturers that supply products ordered by a specific user</p>
+    </a>
+
+    <a asp-action="ProductsInSameCategories" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">Products in Same Categories</h5>
+        <p class="mb-1">Find products that belong to the same categories as a specified product</p>
+    </a>
+
+    <a asp-action="UsersWithDifferentOrders" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">Users with Different Orders</h5>
+        <p class="mb-1">Find users who haven't ordered any products that a specific user has ordered</p>
+    </a>
+
+    <a asp-action="ProductsAboveCategoryAverage" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">Products Above Category Average</h5>
+        <p class="mb-1">Find products with price higher than average in their category</p>
+    </a>
+
+    <a asp-action="ManufacturersWithAllCategoryProducts" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">Manufacturers with All Category Products</h5>
+        <p class="mb-1">Find manufacturers that supply all products in a specific category</p>
+    </a>
+
+    <a asp-action="UsersWithSameOrders" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">Users with Same Orders</h5>
+        <p class="mb-1">Find pairs of users who ordered exactly the same products</p>
+    </a>
+</div>
+
+<div class="mt-3">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Back to Main Menu</a>
+</div> 

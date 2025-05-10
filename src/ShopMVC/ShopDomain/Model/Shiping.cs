@@ -13,6 +13,10 @@ public partial class Shiping : Entity
 
     public int? ShippingCompanyId { get; set; }
 
+    public string? ShTrackingNumber { get; set; }
+
+    public string? ShStatus { get; set; }
+
     public virtual Country? Country { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();

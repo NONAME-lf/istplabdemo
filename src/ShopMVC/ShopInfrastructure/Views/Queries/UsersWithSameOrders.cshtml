@@ -1,0 +1,31 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Users with Same Orders";
+}
+
+<h2>Users with Same Orders</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User 1</th>
+            <th>User 2</th>
+            <th>Common Products</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+                <tr>
+                    <td>@item.User1Name</td>
+                    <td>@item.User2Name</td>
+                    <td>@string.Join(", ", item.CommonProducts)</td>
+                </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary">Back to Menu</a>
+</div> 

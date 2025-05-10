@@ -85,7 +85,7 @@ public partial class ShopDbContext : IdentityDbContext<User>
             entity.Property(e => e.CgImage)
                 .HasMaxLength(1000)
                 .HasColumnName("cg_image");
-    
+
             entity.Property(e => e.ParentCategoryId).HasColumnName("parent_category_id");
 
             entity.HasOne(e => e.ParentCategory)
@@ -192,7 +192,7 @@ public partial class ShopDbContext : IdentityDbContext<User>
             entity.Property(e => e.PdQuantity).HasColumnName("pd_quantity");
             entity.Property(e => e.PdImagePath).HasColumnName("pd_image_path")
                 .HasMaxLength(450);
-                
+
             entity.HasOne(d => d.Manufacturer).WithMany(p => p.Products)
                 .HasForeignKey(d => d.ManufacturerId)
                 .HasConstraintName("FK_products_manufacturers");
@@ -310,6 +310,12 @@ public partial class ShopDbContext : IdentityDbContext<User>
                 .HasMaxLength(100)
                 .HasColumnName("sh_adress");
             entity.Property(e => e.ShippingCompanyId).HasColumnName("shipping_company_id");
+            entity.Property(e => e.ShTrackingNumber)
+                .HasMaxLength(50)
+                .HasColumnName("sh_tracking_number");
+            entity.Property(e => e.ShStatus)
+                .HasMaxLength(50)
+                .HasColumnName("sh_status");
 
             entity.HasOne(d => d.Country).WithMany(p => p.Shipings)
                 .HasForeignKey(d => d.CountryId)
@@ -338,6 +344,9 @@ public partial class ShopDbContext : IdentityDbContext<User>
             entity.Property(e => e.ScPricing)
                 .HasColumnType("decimal(18, 0)")
                 .HasColumnName("sc_pricing");
+            entity.Property(e => e.ScContactInfo)
+                .HasMaxLength(100)
+                .HasColumnName("sc_contact_info");
         });
 
         modelBuilder.Entity<User>(entity =>

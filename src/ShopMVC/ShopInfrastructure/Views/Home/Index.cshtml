@@ -5,7 +5,7 @@
 <div class="container text-center">
     <h1 class="display-4">Ласкаво просимо до нашого магазину!</h1>
     <p class="lead">Широкий вибір товарів за найкращими цінами!</p>
-    
+
     <div class="row mt-4">
         <div class="col-md-6">
             <h3>Чому обирають нас?</h3>
@@ -17,11 +17,20 @@
             </ul>
         </div>
         <div class="col-md-6">
-            <img src="https://cdn4.vectorstock.com/i/1000x1000/41/03/online-shop-logo-for-business-vector-22914103.jpg" class="img-fluid rounded" alt="Магазин">
+            <img src="https://cdn4.vectorstock.com/i/1000x1000/41/03/online-shop-logo-for-business-vector-22914103.jpg"
+                class="img-fluid rounded" alt="Магазин">
         </div>
     </div>
 
     <div class="mt-5">
-        <a asp-controller="Products" asp-action="Index" class="btn btn-primary btn-lg">Перейти до каталогу</a>
+        <div class="row">
+            <div class="col-md-6">
+                <a asp-controller="Products" asp-action="Index" class="btn btn-primary btn-lg w-100 mb-3">Перейти до
+                    каталогу</a>
+            </div>
+            <div class="col-md-6">
+                <a asp-controller="Queries" asp-action="Index" class="btn btn-info btn-lg w-100 mb-3">Складні запити</a>
+            </div>
+        </div>
     </div>
 </div>
