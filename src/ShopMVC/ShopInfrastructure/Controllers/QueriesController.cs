@@ -1,20 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ShopDomain.Model;
-using ShopInfrastructure;
-using System.Linq;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace ShopInfrastructure.Controllers
 {
     [Route("[controller]")]
     public class QueriesController : Controller
     {
-        private readonly ShopDbContext _context;
+        private readonly string _connectionString;
 
-        public QueriesController(ShopDbContext context)
+        public QueriesController(IConfiguration configuration)
         {
-            _context = context;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         // GET: Queries
@@ -29,21 +29,38 @@ namespace ShopInfrastructure.Controllers
         // Query 1: Find products that haven't been ordered yet and have quantity less than specified
         [HttpGet]
         [Route("UnorderedProductsByQuantity")]
-        public async Task<IActionResult> UnorderedProductsByQuantity(int maxQuantity)
+        public async Task<IActionResult> UnorderedProductsByQuantity(int? maxQuantity)
         {
-            var products = await _context.Products
-                .Where(p => p.PdQuantity < maxQuantity &&
-                           !_context.ProductOrders.Any(po => po.ProductId == p.Id))
-                .Select(p => new
-                {
-                    p.PdName,
-                    p.PdQuantity,
-                    p.PdPrice,
-                    Manufacturer = p.Manufacturer.MnName
-                })
-                .ToListAsync();
+            if (!maxQuantity.HasValue)
+            {
+                return View(new List<dynamic>());
+            }
 
-            return View(products);
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetUnorderedProductsByQuantity", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@MaxQuantity", maxQuantity.Value);
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                PdName = reader["pd_name"],
+                                PdQuantity = reader["pd_quantity"],
+                                PdPrice = reader["pd_price"],
+                                MnName = reader["mn_name"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
         }
 
         // Query 2: Find manufacturers that supply products ordered by a specific user
@@ -51,45 +68,69 @@ namespace ShopInfrastructure.Controllers
         [Route("ManufacturersByUserOrders")]
         public async Task<IActionResult> ManufacturersByUserOrders(string userId)
         {
-            var manufacturers = await _context.Manufacturers
-                .Where(m => m.Products
-                    .Any(p => p.ProductOrders
-                        .Any(po => po.Order.OdUser == userId)))
-                .Select(m => new
-                {
-                    m.MnName,
-                    Products = m.Products
-                        .Where(p => p.ProductOrders
-                            .Any(po => po.Order.OdUser == userId))
-                        .Select(p => p.PdName)
-                })
-                .ToListAsync();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return View(new List<dynamic>());
+            }
 
-            return View(manufacturers);
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetManufacturersByUserOrders", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserId", userId);
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                MnName = reader["mn_name"],
+                                Products = reader["Products"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
         }
 
         // Query 3: Find products in the same categories as a specified product
         [HttpGet]
         [Route("ProductsInSameCategories")]
-        public async Task<IActionResult> ProductsInSameCategories(int productId)
+        public async Task<IActionResult> ProductsInSameCategories(int? productId)
         {
-            var products = await _context.Products
-                .Where(p => p.Id != productId &&
-                           p.ProductCategories
-                               .Select(pc => pc.CategoryId)
-                               .All(catId => _context.ProductCategories
-                                   .Where(pc => pc.ProductId == productId)
-                                   .Select(pc => pc.CategoryId)
-                                   .Contains(catId)))
-                .Select(p => new
-                {
-                    p.PdName,
-                    Categories = p.ProductCategories
-                        .Select(pc => pc.Category.CgName)
-                })
-                .ToListAsync();
+            if (!productId.HasValue)
+            {
+                return View(new List<dynamic>());
+            }
 
-            return View(products);
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetProductsInSameCategories", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@ProductId", productId.Value);
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                PdName = reader["pd_name"],
+                                Categories = reader["Categories"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
         }
 
         // Query 4: Find users who haven't ordered any products that a specific user has ordered
@@ -97,24 +138,34 @@ namespace ShopInfrastructure.Controllers
         [Route("UsersWithDifferentOrders")]
         public async Task<IActionResult> UsersWithDifferentOrders(string userId)
         {
-            var users = await _context.Users
-                .Where(u => u.Id != userId &&
-                           !u.Orders
-                               .SelectMany(o => o.ProductOrders)
-                               .Select(po => po.ProductId)
-                               .Any(pid => _context.Orders
-                                   .Where(o => o.OdUser == userId)
-                                   .SelectMany(o => o.ProductOrders)
-                                   .Select(po => po.ProductId)
-                                   .Contains(pid)))
-                .Select(u => new
-                {
-                    u.UserName,
-                    OrderCount = u.Orders.Count
-                })
-                .ToListAsync();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return View(new List<dynamic>());
+            }
 
-            return View(users);
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetUsersWithDifferentOrders", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserId", userId);
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                UsName = reader["UsName"],
+                                OrderCount = reader["OrderCount"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
         }
 
         // Query 5: Find products with price higher than average in their category
@@ -122,53 +173,66 @@ namespace ShopInfrastructure.Controllers
         [Route("ProductsAboveCategoryAverage")]
         public async Task<IActionResult> ProductsAboveCategoryAverage()
         {
-            var products = await _context.Products
-                .Select(p => new
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetProductsAboveCategoryAverage", connection))
                 {
-                    p.PdName,
-                    p.PdPrice,
-                    Category = p.ProductCategories
-                        .Select(pc => pc.Category.CgName)
-                        .FirstOrDefault(),
-                    AveragePrice = _context.Products
-                        .Where(p2 => p2.ProductCategories
-                            .Any(pc => pc.CategoryId == p.ProductCategories
-                                .Select(pc2 => pc2.CategoryId)
-                                .FirstOrDefault()))
-                        .Average(p2 => p2.PdPrice)
-                })
-                .Where(p => p.PdPrice > p.AveragePrice)
-                .ToListAsync();
+                    command.CommandType = CommandType.StoredProcedure;
 
-            return View(products);
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                PdName = reader["pd_name"],
+                                PdPrice = reader["pd_price"],
+                                CgName = reader["cg_name"],
+                                AvgPrice = reader["AvgPrice"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
         }
 
         // Query 6: Find manufacturers that supply all products in a specific category
         [HttpGet]
         [Route("ManufacturersWithAllCategoryProducts")]
-        public async Task<IActionResult> ManufacturersWithAllCategoryProducts(int categoryId)
+        public async Task<IActionResult> ManufacturersWithAllCategoryProducts(int? categoryId)
         {
-            var manufacturers = await _context.Manufacturers
-                .Where(m => m.Products
-                    .SelectMany(p => p.ProductCategories)
-                    .Where(pc => pc.CategoryId == categoryId)
-                    .Select(pc => pc.ProductId)
-                    .Distinct()
-                    .Count() == _context.Products
-                        .Where(p => p.ProductCategories
-                            .Any(pc => pc.CategoryId == categoryId))
-                        .Count())
-                .Select(m => new
-                {
-                    m.MnName,
-                    Products = m.Products
-                        .Where(p => p.ProductCategories
-                            .Any(pc => pc.CategoryId == categoryId))
-                        .Select(p => p.PdName)
-                })
-                .ToListAsync();
+            if (!categoryId.HasValue)
+            {
+                return View(new List<dynamic>());
+            }
 
-            return View(manufacturers);
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetManufacturersWithAllCategoryProducts", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@CategoryId", categoryId.Value);
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                MnName = reader["mn_name"],
+                                MnCountry = reader["MnCountry"],
+                                ProductCount = reader["ProductCount"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
         }
 
         // Query 7: Find pairs of users who ordered exactly the same products
@@ -176,32 +240,192 @@ namespace ShopInfrastructure.Controllers
         [Route("UsersWithSameOrders")]
         public async Task<IActionResult> UsersWithSameOrders()
         {
-            var userPairs = await _context.Users
-                .SelectMany(u1 => _context.Users
-                    .Where(u2 => u1.Id.CompareTo(u2.Id) < 0)
-                    .Select(u2 => new { User1 = u1, User2 = u2 }))
-                .Where(pair =>
-                    pair.User1.Orders
-                        .SelectMany(o => o.ProductOrders)
-                        .Select(po => po.ProductId)
-                        .OrderBy(id => id)
-                        .SequenceEqual(
-                            pair.User2.Orders
-                                .SelectMany(o => o.ProductOrders)
-                                .Select(po => po.ProductId)
-                                .OrderBy(id => id)))
-                .Select(pair => new
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetUsersWithSameOrders", connection))
                 {
-                    User1Name = pair.User1.UserName,
-                    User2Name = pair.User2.UserName,
-                    CommonProducts = pair.User1.Orders
-                        .SelectMany(o => o.ProductOrders)
-                        .Select(po => po.Product.PdName)
-                        .Distinct()
-                })
-                .ToListAsync();
+                    command.CommandType = CommandType.StoredProcedure;
 
-            return View(userPairs);
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                User1 = reader["User1"],
+                                User2 = reader["User2"],
+                                CommonProducts = reader["CommonProducts"],
+                                CommonProductCount = reader["CommonProductCount"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
+        }
+
+        // Query 8: Find products that share ALL categories with a specified product
+        [HttpGet]
+        [Route("ProductsWithAllSameCategories")]
+        public async Task<IActionResult> ProductsWithAllSameCategories(int? productId)
+        {
+            if (!productId.HasValue)
+            {
+                return View(new List<dynamic>());
+            }
+
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetProductsWithAllSameCategories", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@ProductId", productId.Value);
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                PdName = reader["pd_name"],
+                                Categories = reader["Categories"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
+        }
+
+        // Query 9: Find products ordered by all users in a specific shipping country
+        [HttpGet]
+        [Route("ProductsOrderedByAllUsersInCountry")]
+        public async Task<IActionResult> ProductsOrderedByAllUsersInCountry(int? countryId)
+        {
+            // Get list of countries for the dropdown
+            var countries = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("SELECT co_id as Id, co_name as Name FROM countries", connection))
+                {
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            countries.Add(new
+                            {
+                                Id = reader["Id"],
+                                Name = reader["Name"]
+                            });
+                        }
+                    }
+                }
+            }
+            ViewBag.Countries = countries;
+
+            if (!countryId.HasValue)
+            {
+                return View(new List<dynamic>());
+            }
+
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetProductsOrderedByAllUsersInCountry", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@CountryId", countryId.Value);
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                ProductName = reader["ProductName"],
+                                ManufacturerName = reader["ManufacturerName"],
+                                UserCount = reader["UserCount"],
+                                TotalUsersInCountry = reader["TotalUsersInCountry"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
+        }
+
+        // Query 10: Find manufacturers that supply products in all categories
+        [HttpGet]
+        [Route("ManufacturersWithAllCategories")]
+        public async Task<IActionResult> ManufacturersWithAllCategories()
+        {
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetManufacturersWithAllCategories", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                ManufacturerName = reader["ManufacturerName"],
+                                Country = reader["Country"],
+                                CategoriesSupplied = reader["CategoriesSupplied"],
+                                TotalCategories = reader["TotalCategories"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
+        }
+
+        // Query 11: Find users who ordered products from all manufacturers
+        [HttpGet]
+        [Route("UsersWithAllManufacturers")]
+        public async Task<IActionResult> UsersWithAllManufacturers()
+        {
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetUsersWithAllManufacturers", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                UserName = reader["UserName"],
+                                ManufacturersOrderedFrom = reader["ManufacturersOrderedFrom"],
+                                TotalManufacturers = reader["TotalManufacturers"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
+        }
+
+        [HttpGet]
+        [Route("UserManual")]
+        public IActionResult UserManual()
+        {
+            return View();
         }
     }
 }

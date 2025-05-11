@@ -27,18 +27,18 @@
     <thead>
         <tr>
             <th>Manufacturer Name</th>
-            <th>Country</th>
-            <th>Number of Products</th>
+            <th>Contact Info</th>
+            <th>Product Count</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
-                <tr>
-                    <td>@item.MnName</td>
-                    <td>@item.Country</td>
-                    <td>@item.ProductCount</td>
-                </tr>
+                        <tr>
+                            <td>@item.MnName</td>
+                            <td>@item.MnCountry</td>
+                            <td>@item.ProductCount</td>
+                        </tr>
         }
     </tbody>
 </table>

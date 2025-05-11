@@ -18,12 +18,12 @@
     <tbody>
         @foreach (var item in Model)
         {
-                <tr>
-                    <td>@item.PdName</td>
-                    <td>@item.PdPrice.ToString("C")</td>
-                    <td>@item.Category</td>
-                    <td>@item.AveragePrice.ToString("C")</td>
-                </tr>
+                        <tr>
+                            <td>@item.PdName</td>
+                            <td>@item.PdPrice.ToString("C")</td>
+                            <td>@item.CgName</td>
+                            <td>@item.AvgPrice.ToString("C")</td>
+                        </tr>
         }
     </tbody>
 </table>
