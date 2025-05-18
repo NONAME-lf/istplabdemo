@@ -69,8 +69,17 @@
         </a>
 
         <a asp-action="UsersWithSameOrders" class="list-group-item list-group-item-action">
-            <h5>Users with Same Orders</h5>
-            <p class="mb-1">Uses multiple comparisons to find users who ordered exactly the same products</p>
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Користувачі з однаковими замовленнями</h5>
+            </div>
+            <p class="mb-1">Використовує множинні порівняння для пошуку користувачів, які замовляли однакові товари</p>
+        </a>
+
+        <a asp-action="ManufacturersWithSameCustomerBirthMonths" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Виробники з однаковими місяцями народження замовників</h5>
+            </div>
+            <p class="mb-1">Знаходить виробників, у яких співпадають множини місяців народження замовників</p>
         </a>
     </div>
 </div>

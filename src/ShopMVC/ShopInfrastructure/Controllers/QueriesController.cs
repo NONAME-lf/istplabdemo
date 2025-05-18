@@ -427,5 +427,36 @@ namespace ShopInfrastructure.Controllers
         {
             return View();
         }
+
+        // Query 12: Find manufacturers with customers sharing the same birth months
+        [HttpGet]
+        [Route("ManufacturersWithSameCustomerBirthMonths")]
+        public async Task<IActionResult> ManufacturersWithSameCustomerBirthMonths()
+        {
+            var results = new List<dynamic>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand("GetManufacturersWithSameCustomerBirthMonths", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            results.Add(new
+                            {
+                                Manufacturer1 = reader["Manufacturer1"],
+                                Manufacturer2 = reader["Manufacturer2"],
+                                CommonBirthMonths = reader["CommonBirthMonths"],
+                                MonthCount = reader["MonthCount"]
+                            });
+                        }
+                    }
+                }
+            }
+            return View(results);
+        }
     }
 }

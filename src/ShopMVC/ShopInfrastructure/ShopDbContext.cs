@@ -52,7 +52,13 @@ public partial class ShopDbContext : IdentityDbContext<User>
 
             entity.ToTable("carts");
 
-            entity.HasIndex(e => e.UserId, "unique_user_cart").IsUnique();
+            entity.HasIndex(e => e.UserId, "IX_carts_user_id_unique")
+                .IsUnique()
+                .HasFilter("[user_id] IS NOT NULL");
+
+            entity.HasIndex(e => e.SessionId, "IX_carts_session_id_unique")
+                .IsUnique()
+                .HasFilter("[session_id] IS NOT NULL");
 
             entity.Property(e => e.Id).HasColumnName("ct_id");
             entity.Property(e => e.CtPrice).HasColumnName("ct_price");

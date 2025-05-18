@@ -298,28 +298,80 @@
                         GROUP BY up1.od_user, up2.od_user<br>
                         HAVING COUNT(DISTINCT po.product_id) > 1;</code>
                     </li>
+                    <li>
+                        <strong>Виробники з користувачами, які мають однаковий місяць народження</strong><br>
+                        <em>Знаходить виробників, у яких співпадають множини місяців народження замовників</em><br>
+                        <code>WITH ManufacturerCustomerMonths AS (<br>
+                        SELECT m.mn_id, m.mn_name,<br>
+                        STRING_AGG(DISTINCT CAST(MONTH(u.UrBirthdate) AS VARCHAR), ',') WITHIN GROUP (ORDER BY MONTH(u.UrBirthdate)) as BirthMonths<br>
+                        FROM manufacturers m<br>
+                        JOIN products p ON m.mn_id = p.manufacturer_id<br>
+                        JOIN product_orders po ON p.pd_id = po.product_id<br>
+                        JOIN orders o ON po.order_id = o.od_id<br>
+                        JOIN users u ON o.od_user = u.Id<br>
+                        GROUP BY m.mn_id, m.mn_name<br>
+                        )<br>
+                        SELECT mcm1.mn_name as Manufacturer1, mcm2.mn_name as Manufacturer2,<br>
+                        STRING_AGG(DISTINCT CAST(value AS VARCHAR), ', ') as CommonBirthMonths,<br>
+                        COUNT(DISTINCT value) as MonthCount<br>
+                        FROM ManufacturerCustomerMonths mcm1<br>
+                        JOIN ManufacturerCustomerMonths mcm2 ON mcm1.BirthMonths = mcm2.BirthMonths AND mcm1.mn_id < mcm2.mn_id<br>
+                        CROSS APPLY STRING_SPLIT(mcm1.BirthMonths, ',')<br>
+                        GROUP BY mcm1.mn_name, mcm2.mn_name<br>
+                        HAVING COUNT(DISTINCT value) > 1;</code>
+                    </li>
                 </ol>
             </div>
         </div>
     </div>
+    <div class="list-group-item list-group-item-action">
+        <a asp-action="ManufacturersWithSameCustomerBirthMonths" class="text-decoration-none">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Виробники з однаковими місяцями народження замовників</h5>
+            </div>
+            <p class="mb-1">Знаходить виробників, у яких співпадають множини місяців народження замовників</p>
+        </a>
+        <pre class="bg-light p-3 mt-2"><code>CREATE OR ALTER PROCEDURE GetManufacturersWithSameCustomerBirthMonths
+AS
+BEGIN
+    WITH ManufacturerCustomerMonths AS (
+        SELECT m.mn_id, m.mn_name,
+        STRING_AGG(CAST(MONTH(u.UrBirthdate) AS VARCHAR), ',') WITHIN GROUP (ORDER BY MONTH(u.UrBirthdate)) as BirthMonths
+        FROM manufacturers m
+        JOIN products p ON m.mn_id = p.manufacturer_id
+        JOIN product_orders po ON p.pd_id = po.product_id
+        JOIN orders o ON po.order_id = o.od_id
+        JOIN AspNetUsers u ON o.od_user = u.Id
+        GROUP BY m.mn_id, m.mn_name
+    )
+    SELECT 
+        mcm1.mn_name as Manufacturer1, 
+        mcm2.mn_name as Manufacturer2,
+        mcm1.BirthMonths as CommonBirthMonths,
+        LEN(mcm1.BirthMonths) - LEN(REPLACE(mcm1.BirthMonths, ',', '')) + 1 as MonthCount
+    FROM ManufacturerCustomerMonths mcm1
+    JOIN ManufacturerCustomerMonths mcm2 ON mcm1.BirthMonths = mcm2.BirthMonths AND mcm1.mn_id < mcm2.mn_id
+    WHERE mcm1.BirthMonths IS NOT NULL AND mcm1.BirthMonths != '';
+END</code></pre>
 
-    <div class="mb-5">
-        <h2 class="text-primary">5. Вимоги до користувача</h2>
-        <div class="card">
-            <div class="card-body">
-                <h5>Кваліфікація</h5>
-                <ul>
-                    <li>Базові навички роботи з операційною системою Windows</li>
-                    <li>Знання української мови для роботи з інтерфейсом</li>
-                    <li>Базове розуміння структури даних та взаємозв'язків між ними</li>
-                </ul>
+        <div class="mb-5">
+            <h2 class="text-primary">5. Вимоги до користувача</h2>
+            <div class="card">
+                <div class="card-body">
+                    <h5>Кваліфікація</h5>
+                    <ul>
+                        <li>Базові навички роботи з операційною системою Windows</li>
+                        <li>Знання української мови для роботи з інтерфейсом</li>
+                        <li>Базове розуміння структури даних та взаємозв'язків між ними</li>
+                    </ul>
 
-                <h5>Додаткові вимоги</h5>
-                <ul>
-                    <li>Доступ до веб-браузера (Chrome, Firefox, Edge)</li>
-                    <li>Підключення до інтернету</li>
-                    <li>Розуміння базових концепцій SQL-запитів</li>
-                </ul>
+                    <h5>Додаткові вимоги</h5>
+                    <ul>
+                        <li>Доступ до веб-браузера (Chrome, Firefox, Edge)</li>
+                        <li>Підключення до інтернету</li>
+                        <li>Розуміння базових концепцій SQL-запитів</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

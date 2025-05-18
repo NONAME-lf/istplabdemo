@@ -2,10 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ShopDomain.Model;
 using ShopInfrastructure.ViewModel;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using ShopInfrastructure.ViewModel;
-using ShopInfrastructure.Models;
+
 
 namespace ShopInfrastructure.Controllers;
 
@@ -14,7 +11,7 @@ public class AccountController : Controller
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ShopDbContext _context;
-    
+
     public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, ShopDbContext context)
     {
         _userManager = userManager;

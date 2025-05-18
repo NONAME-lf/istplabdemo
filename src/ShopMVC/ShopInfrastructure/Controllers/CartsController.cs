@@ -16,14 +16,14 @@ namespace ShopInfrastructure.Controllers
     {
         private readonly ShopDbContext _context;
         private readonly UserManager<User> _userManager;
-        
-        public CartsController(ShopDbContext context,  UserManager<User> userManager)
+
+        public CartsController(ShopDbContext context, UserManager<User> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
-        
+
         private async Task<Cart> GetOrCreateCartForCurrentUserAsync()
         {
             string? userId = User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
@@ -51,7 +51,7 @@ namespace ShopInfrastructure.Controllers
                 return newCart;
             }
 
-            // Анонімний користувач — працюємо через SessionId
+            // Anonymous user - work with SessionId
             const string sessionKey = "CartSessionId";
             string? sessionId = HttpContext.Session.GetString(sessionKey);
 
@@ -59,8 +59,6 @@ namespace ShopInfrastructure.Controllers
             {
                 sessionId = Guid.NewGuid().ToString();
                 HttpContext.Session.SetString(sessionKey, sessionId);
-
-                // Комітимо зміну сесії (опціонально, для певних хостингів)
                 await HttpContext.Session.CommitAsync();
             }
 
@@ -75,6 +73,7 @@ namespace ShopInfrastructure.Controllers
             var newSessionCart = new Cart
             {
                 SessionId = sessionId,
+                UserId = null,  // Explicitly set to null for anonymous users
                 CtPrice = 0,
                 CtQuantity = 0
             };
@@ -88,18 +87,18 @@ namespace ShopInfrastructure.Controllers
 
 
 
-        
+
         [HttpPost]
         public async Task<IActionResult> RemoveProduct(int productId)
         {
             //var cartId = HttpContext.Session.GetInt32("CartId");
             var cart = await GetOrCreateCartForCurrentUserAsync();
-            
+
             if (cart == null)
             {
                 return RedirectToAction(nameof(Index));
             }
-           
+
             var productCart = await _context.ProductCarts
                 .FirstOrDefaultAsync(pc => pc.CartId == cart.Id && pc.ProductId == productId);
 
@@ -168,7 +167,7 @@ namespace ShopInfrastructure.Controllers
 
 
 
-        
+
         [HttpGet]
         // GET: Carts
         public async Task<IActionResult> Index()
