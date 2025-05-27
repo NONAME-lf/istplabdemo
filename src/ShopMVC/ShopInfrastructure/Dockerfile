@@ -1,27 +1,25 @@
-# Базовий образ SDK для збірки
+# Базовий образ ASP.NET для запуску
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-# Базовий образ SDK для збірки
+# Образ SDK для побудови застосунку
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Копіюємо csproj і відновлюємо залежності
-COPY ["ShopInfrastructure.csproj", "ShopInfrastructure/"]
-RUN dotnet restore "ShopInfrastructure.csproj"
-
-# Копіюємо весь код і збираємо
+# Копіюємо тільки поточну папку, де зберігається Dockerfile і проект
 COPY . .
-WORKDIR "/src/ShopInfrastructure"
+
+# Відновлюємо залежності та будуємо
+RUN dotnet restore "ShopInfrastructure.csproj"
 RUN dotnet build "ShopInfrastructure.csproj" -c Release -o /app/build
 
 # Публікуємо застосунок
 FROM build AS publish
 RUN dotnet publish "ShopInfrastructure.csproj" -c Release -o /app/publish
 
-# Публікуємо в фінальному образі
+# Фінальний образ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
