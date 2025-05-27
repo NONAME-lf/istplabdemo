@@ -9,20 +9,20 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Копіюємо csproj і відновлюємо залежності
-COPY ["ShopMVC/ShopMVC.csproj", "ShopMVC/"]
-RUN dotnet restore "ShopMVC/ShopMVC.csproj"
+COPY ["ShopInfrastructure/ShopInfrastructure.csproj", "ShopInfrastructure/"]
+RUN dotnet restore "ShopInfrastructure/ShopInfrastructure.csproj"
 
 # Копіюємо весь код і збираємо
 COPY . .
-WORKDIR "/src/ShopMVC"
-RUN dotnet build "ShopMVC.csproj" -c Release -o /app/build
+WORKDIR "/src/ShopInfrastructure"
+RUN dotnet build "ShopInfrastructure.csproj" -c Release -o /app/build
 
 # Публікуємо застосунок
 FROM build AS publish
-RUN dotnet publish "ShopMVC.csproj" -c Release -o /app/publish
+RUN dotnet publish "ShopInfrastructure.csproj" -c Release -o /app/publish
 
 # Публікуємо в фінальному образі
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ShopMVC.dll"]
+ENTRYPOINT ["dotnet", "ShopInfrastructure.dll"]
