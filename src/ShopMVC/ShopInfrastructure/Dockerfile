@@ -9,8 +9,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Копіюємо csproj і відновлюємо залежності
-COPY ["ShopInfrastructure/ShopInfrastructure.csproj", "ShopInfrastructure/"]
-RUN dotnet restore "ShopInfrastructure/ShopInfrastructure.csproj"
+COPY ["ShopInfrastructure.csproj", "ShopInfrastructure/"]
+RUN dotnet restore "ShopInfrastructure.csproj"
 
 # Копіюємо весь код і збираємо
 COPY . .
